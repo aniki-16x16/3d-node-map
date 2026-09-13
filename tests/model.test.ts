@@ -1,17 +1,17 @@
-import test from "node:test";
 import assert from "node:assert/strict";
+import test from "node:test";
 import {
-  demoProject,
   blankProgress,
-  settle,
-  visit,
-  conditionPass,
-  worldEdges,
-  parseProject,
-  validate,
-  duplicateNode,
   blankProject,
-} from "../src/model.js";
+  conditionPass,
+  duplicateNode,
+  parseProject,
+  settle,
+  validate,
+  visit,
+  worldEdges,
+} from "../src/domain/index";
+import { demoProject } from "../src/examples/demoProject";
 test("multiple starts; regions do not reveal neighbors before exit", () => {
   const p = demoProject();
   let s = settle(p, blankProgress());
@@ -102,7 +102,7 @@ test("nested AND/OR and negative cross-area conditions", () => {
 test("directional routes and start conditions", () => {
   const p = demoProject(),
     w = p.maps[0];
-  w.nodes.find((n) => n.id === "camp").show = {
+  w.nodes.find((n) => n.id === "camp")!.show = {
     op: "all",
     rules: [{ type: "key", ref: "moon", not: false }],
   };
@@ -125,14 +125,15 @@ test("JSON validates schema; invalid coordinate and node type are rejected", () 
 });
 test("duplicating an area remaps local condition references and connections", () => {
   const p = demoProject(),
-    source = p.maps[0].nodes.find((n) => n.id === "forest");
+    source = p.maps[0].nodes.find((n) => n.id === "forest")!;
   const copy = duplicateNode(p, "world", source, 120, 120, 0);
-  const area = p.maps.find((m) => m.id === copy.mapId);
+  const area = p.maps.find((m) => m.id === copy.mapId)!;
   assert.notEqual(copy.mapId, source.mapId);
   assert.equal(area.nodes.length, 9);
   assert(area.nodes.some((n) => n.id === area.defaultEntry));
-  const secret = area.nodes.find((n) => n.name === "月之秘藏"),
-    shop = area.nodes.find((n) => n.name === "树梢商人");
+  const secret = area.nodes.find((n) => n.name === "月之秘藏")!,
+    shop = area.nodes.find((n) => n.name === "树梢商人")!;
+  assert("ref" in secret.show.rules[0]);
   assert.equal(secret.show.rules[0].ref, shop.id);
   assert.notEqual(shop.id, "shop1");
   assert.doesNotThrow(() => parseProject(JSON.stringify(p)));
