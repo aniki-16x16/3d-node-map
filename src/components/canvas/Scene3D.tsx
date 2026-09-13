@@ -9,15 +9,15 @@ export default function Scene3D({ onSelect, ...data }: Props) {
     pose = useRef<CameraPose | undefined>(undefined),
     action = useRef(onSelect);
   action.current = onSelect;
-  const { nodes, edges, selected, progress, playing } = data;
+  const { nodes, edges, selected, selectedEdge, progress, playing } = data;
   useEffect(() => {
     if (!host.current) return;
     return createMapScene(
       host.current,
-      { nodes, edges, selected, progress, playing },
+      { nodes, edges, selected, selectedEdge, progress, playing },
       pose,
       (id) => action.current(id),
     );
-  }, [nodes, edges, selected, progress, playing]);
+  }, [nodes, edges, selected, selectedEdge, progress, playing]);
   return <div className="scene3d" ref={host} />;
 }

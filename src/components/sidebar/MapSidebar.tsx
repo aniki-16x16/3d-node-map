@@ -1,4 +1,10 @@
-import { CheckCircle2, ChevronRight, CircleHelp, Globe2 } from "lucide-react";
+import {
+  CheckCircle2,
+  ChevronRight,
+  CircleHelp,
+  Globe2,
+  Trash2,
+} from "lucide-react";
 import type { EditorController } from "../../hooks/useEditorController";
 import NodePalette from "./NodePalette";
 import PreviewPanel from "./PreviewPanel";
@@ -16,6 +22,8 @@ type Props = Pick<
   | "notify"
   | "changeMap"
   | "addNode"
+  | "deleteMap"
+  | "readonly"
 >;
 export default function MapSidebar({
   project,
@@ -30,6 +38,8 @@ export default function MapSidebar({
   notify,
   changeMap,
   addNode,
+  deleteMap,
+  readonly,
 }: Props) {
   return (
     <aside className="sidebar">
@@ -63,32 +73,44 @@ export default function MapSidebar({
                   n.mapId === m.id && activeProgress.completed.includes(n.id),
               );
             return (
-              <button
-                disabled={!accessible}
-                key={m.id}
-                className={`map-item area ${map.id === m.id ? "chosen" : ""}`}
-                onClick={() => {
-                  changeMap(m.id);
-                  if (playing) {
-                    const target = m.nodes.find(
-                      (n) => n.id === activeProgress.current,
-                    );
-                    setLayer(target?.z || 0);
-                  }
-                }}
-              >
-                <span className="map-number">
-                  {String(i + 1).padStart(2, "0")}
-                </span>
-                <span>
-                  {m.name}
-                  <small>
-                    {m.nodes.length} 个节点 ·{" "}
-                    {new Set(m.nodes.map((n) => n.z)).size} 层
-                  </small>
-                </span>
-                <ChevronRight size={14} />
-              </button>
+              <div className="area-row" key={m.id}>
+                <button
+                  disabled={!accessible}
+                  key={m.id}
+                  className={`map-item area ${map.id === m.id ? "chosen" : ""}`}
+                  onClick={() => {
+                    changeMap(m.id);
+                    if (playing) {
+                      const target = m.nodes.find(
+                        (n) => n.id === activeProgress.current,
+                      );
+                      setLayer(target?.z || 0);
+                    }
+                  }}
+                >
+                  <span className="map-number">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <span>
+                    {m.name}
+                    <small>
+                      {m.nodes.length} 个节点 ·{" "}
+                      {new Set(m.nodes.map((n) => n.z)).size} 层
+                    </small>
+                  </span>
+                  <ChevronRight size={14} />
+                </button>
+                {!readonly && (
+                  <button
+                    className="delete-map"
+                    title={`删除二级地图 ${m.name}（可撤销）`}
+                    aria-label={`删除二级地图 ${m.name}`}
+                    onClick={() => deleteMap(m.id)}
+                  >
+                    <Trash2 size={15} />
+                  </button>
+                )}
+              </div>
             );
           })}
       </nav>

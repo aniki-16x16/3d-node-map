@@ -4,6 +4,7 @@ export interface SceneData {
   nodes: MapNode[];
   edges: MapEdge[];
   selected: string | null;
+  selectedEdge: string | null;
   progress: Progress;
   playing: boolean;
 }

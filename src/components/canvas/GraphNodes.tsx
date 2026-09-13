@@ -59,15 +59,6 @@ export default function GraphNodes({
               }}
             >
               <rect
-                className="selection-halo"
-                x="-30"
-                y="-30"
-                width="60"
-                height="60"
-                rx="7"
-                transform="rotate(45)"
-              />
-              <rect
                 className="diamond"
                 x="-24"
                 y="-24"
@@ -83,10 +74,6 @@ export default function GraphNodes({
               )}
               <text y="62" textAnchor="middle" className="node-name">
                 {n.name}
-              </text>
-              <text y="79" textAnchor="middle" className="node-type">
-                {n.start ? "起始节点" : TYPES[n.type]}
-                {done ? " · 已完成" : ""}
               </text>
               {n.show.rules.length > 0 && !playing && (
                 <EyeOff x="24" y="-35" size={13} />
@@ -107,7 +94,7 @@ export default function GraphNodes({
                     cx={x}
                     cy={y}
                     r="6"
-                    className={`port ${pending?.id === n.id && pending.port === port ? "pending" : ""} ${pending ? "show" : ""}`}
+                    className={`port ${pending?.id === n.id && pending.port === port ? "pending" : ""}`}
                     onPointerDown={(e) => e.stopPropagation()}
                     onClick={(e) => {
                       e.stopPropagation();

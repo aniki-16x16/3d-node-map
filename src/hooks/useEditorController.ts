@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { worldEdges } from "../domain/world";
+import { deleteArea } from "../domain/deleteArea";
 import type { EditorTool, Modal, PendingConnection } from "./editorTypes";
 import { useCanvasInteraction } from "./useCanvasInteraction";
 import { useEditorShortcuts } from "./useEditorShortcuts";
@@ -106,6 +107,13 @@ export function useEditorController() {
       setPending(null);
     }
   };
+  const deleteMap = (id: string) => {
+    if (readonly || !project.maps.some((m) => m.id === id && m.kind === "area"))
+      return;
+    commit((p) => deleteArea(p, id));
+    changeMap(map.id === id ? world.id : map.id);
+    notify("二级地图及关联节点已删除，可撤销恢复");
+  };
   const redo = () => {
     if (!readonly) {
       document.redo();
@@ -165,6 +173,7 @@ export function useEditorController() {
     saveState,
     changeMap,
     readonly,
+    deleteMap,
     visibleNodes,
     layers,
     undo,

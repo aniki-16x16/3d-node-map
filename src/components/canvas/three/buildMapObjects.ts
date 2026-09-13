@@ -8,7 +8,7 @@ import { colors, ICONS as icons } from "../../nodeAppearance";
 import type { SceneData } from "./types";
 export function buildMapObjects(
   scene: THREE.Scene,
-  { nodes, edges, selected, progress, playing }: SceneData,
+  { nodes, edges, selected, selectedEdge, progress, playing }: SceneData,
   pos: (n: Position) => THREE.Vector3,
   span: number,
 ) {
@@ -81,7 +81,11 @@ export function buildMapObjects(
     const mesh = new THREE.Mesh(
       new THREE.ExtrudeGeometry(shape, { depth: 7, bevelEnabled: false }),
       new THREE.MeshBasicMaterial({
-        color: locked ? "#242c36" : done ? "#294b3b" : "#1d2c37",
+        color: locked
+          ? "#242c36"
+          : done || n.id === selected
+            ? "#294b3b"
+            : "#1d2c37",
       }),
     );
     mesh.rotation.x = -Math.PI / 2;
@@ -92,7 +96,7 @@ export function buildMapObjects(
     const border = new THREE.LineSegments(
       new THREE.EdgesGeometry(mesh.geometry),
       new THREE.LineBasicMaterial({
-        color: n.id === selected ? "#ffffff" : colors[n.type],
+        color: colors[n.type],
       }),
     );
     mesh.add(border);
@@ -127,42 +131,73 @@ export function buildMapObjects(
     const a = nodes.find((n) => n.id === e.a),
       b = nodes.find((n) => n.id === e.b);
     if (!a || !b) continue;
-    let points: THREE.Vector3[];
-    if (a.z === b.z)
-      points = route(a, b, e.ap, e.bp).map((p) => pos({ ...p, z: a.z }));
-    else {
-      const r = route(a, b, e.ap, e.bp);
-      points = [
-        pos({ ...r[0], z: a.z }),
-        pos({ ...r[0], z: a.z }).add(new THREE.Vector3(0, (b.z - a.z) * 90, 0)),
-        pos({ ...r.at(-1)!, z: b.z }).add(
-          new THREE.Vector3(0, -(b.z - a.z) * 90, 0),
-        ),
-        pos({ ...r.at(-1)!, z: b.z }),
-      ];
-    }
-    const line = new THREE.Line(
-      new THREE.BufferGeometry().setFromPoints(points),
-      new THREE.LineBasicMaterial({
-        color: a.z !== b.z ? 0x9abdc4 : 0x627382,
-        transparent: true,
-        opacity: 0.85,
-      }),
-    );
-    scene.add(line);
-    if (e.directed) {
-      const end = points.at(-1)!,
-        dir = end.clone().sub(points.at(-2)!).normalize();
-      scene.add(
-        new THREE.ArrowHelper(
-          dir,
-          end.clone().addScaledVector(dir, -18),
-          18,
-          0x9aabba,
-          12,
-          8,
+    const routed = route(a, b, e.ap, e.bp);
+    const crossLayer = a.z !== b.z;
+    const points = crossLayer
+      ? [pos({ ...routed[0], z: a.z }), pos({ ...routed.at(-1)!, z: b.z })]
+      : routed.map((p) => pos({ ...p, z: a.z }));
+    const highlighted = e.id === selectedEdge;
+    const color = highlighted ? 0xc1ebd5 : crossLayer ? 0x9abdc4 : 0x627382;
+    const addEdgeObject = (object: THREE.Object3D) => {
+      object.renderOrder = highlighted ? 10 : 0;
+      scene.add(object);
+    };
+    if (crossLayer) {
+      const start = points[0],
+        end = points[1];
+      const length = start.distanceTo(end);
+      const direction = end.clone().sub(start).normalize();
+      // Mesh dashes have real thickness on all WebGL implementations.
+      for (let distance = 14; distance < length - 14; distance += 28) {
+        const dashLength = Math.min(17, length - 14 - distance);
+        const dash = new THREE.Mesh(
+          new THREE.CylinderGeometry(2, 2, dashLength, 8),
+          new THREE.MeshBasicMaterial({ color, depthTest: !highlighted }),
+        );
+        dash.position
+          .copy(start)
+          .addScaledVector(direction, distance + dashLength / 2);
+        dash.quaternion.setFromUnitVectors(
+          new THREE.Vector3(0, 1, 0),
+          direction,
+        );
+        addEdgeObject(dash);
+      }
+    } else {
+      addEdgeObject(
+        new THREE.Line(
+          new THREE.BufferGeometry().setFromPoints(points),
+          new THREE.LineBasicMaterial({
+            color,
+            transparent: true,
+            opacity: highlighted ? 1 : 0.85,
+            depthTest: !highlighted,
+          }),
         ),
       );
+    }
+    for (const [tip, neighbor] of [
+      [points[0], points.find((p) => p.distanceToSquared(points[0]) > 0)],
+      [
+        points.at(-1)!,
+        [...points]
+          .reverse()
+          .find((p) => p.distanceToSquared(points.at(-1)!) > 0),
+      ],
+    ]) {
+      if (!tip || !neighbor) continue;
+      const direction = tip.clone().sub(neighbor).normalize();
+      const height = Math.min(
+        crossLayer ? 16 : 12,
+        tip.distanceTo(neighbor) / 2,
+      );
+      const cone = new THREE.Mesh(
+        new THREE.ConeGeometry(crossLayer ? 6 : 4, height, 12),
+        new THREE.MeshBasicMaterial({ color, depthTest: !highlighted }),
+      );
+      cone.position.copy(tip).addScaledVector(direction, -height / 2);
+      cone.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), direction);
+      addEdgeObject(cone);
     }
   }
   return clickable;

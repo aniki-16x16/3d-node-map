@@ -91,6 +91,7 @@ export default function MapViewport({
           nodes={visibleNodes}
           edges={edges}
           selected={selected}
+          selectedEdge={selectedEdge}
           progress={activeProgress}
           playing={playing}
           onSelect={onNode}

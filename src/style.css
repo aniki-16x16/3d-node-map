@@ -473,6 +473,9 @@ main {
   cursor: grab;
   color: var(--node-color);
 }
+.map-node:focus {
+  outline: none;
+}
 .map-node .diamond {
   fill: #1b252d;
   stroke: var(--node-color);
@@ -483,19 +486,10 @@ main {
   fill: #2b3b42;
   stroke-width: 2.5;
 }
-.map-node .selection-halo {
-  fill: transparent;
-  stroke: transparent;
-  stroke-width: 1;
-}
-.map-node.selected .selection-halo {
-  fill: #b0e5ce0a;
-  stroke: #b3e7cf;
-  stroke-dasharray: 3 4;
-}
+.map-node:focus-visible .diamond,
 .map-node.selected .diamond {
   fill: #30483f;
-  stroke: #cdf8e2;
+  stroke: var(--node-color);
   stroke-width: 2;
 }
 .map-node .node-name {
@@ -527,8 +521,7 @@ main {
   cursor: crosshair;
 }
 .map-node:hover .port,
-.port.show,
-.port.pending {
+.map-node:focus-visible .port {
   opacity: 1;
 }
 .port:hover,
@@ -543,10 +536,6 @@ main {
   stroke-linejoin: round;
   pointer-events: stroke;
 }
-.edge.selected {
-  stroke: #c1ebd5;
-  stroke-width: 3;
-}
 .edge.generated {
   stroke-dasharray: 6 5;
   stroke: #897ea5;
@@ -560,6 +549,10 @@ main {
 .edge.cross {
   stroke-dasharray: 5 5;
   stroke: #789aac;
+}
+.edge.selected {
+  stroke: #c1ebd5;
+  stroke-width: 3;
 }
 .cross-layer rect {
   fill: #1c2b36;
@@ -1233,4 +1226,37 @@ footer i {
   .layer-control {
     bottom: 75px;
   }
+}
+
+.canvas {
+  user-select: none;
+  -webkit-user-select: none;
+}
+.view-axes {
+  position: absolute;
+  right: 20px;
+  bottom: 20px;
+  width: 132px;
+  height: 132px;
+  pointer-events: none;
+  background: #111c26cc;
+  border: 1px solid #33414e;
+  border-radius: 12px;
+}
+.area-row {
+  display: flex;
+  align-items: center;
+}
+.area-row .map-item {
+  flex: 1;
+  min-width: 0;
+}
+.delete-map {
+  flex-shrink: 0;
+  padding: 8px;
+  color: #8b9aa7;
+}
+.delete-map:hover {
+  color: #ff9898;
+  background: #482a30;
 }
