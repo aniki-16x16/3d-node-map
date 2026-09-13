@@ -1,0 +1,140 @@
+import test from "node:test";
+import assert from "node:assert/strict";
+import {
+  demoProject,
+  blankProgress,
+  settle,
+  visit,
+  conditionPass,
+  worldEdges,
+  parseProject,
+  validate,
+  duplicateNode,
+  blankProject,
+} from "../src/model.js";
+test("multiple starts; regions do not reveal neighbors before exit", () => {
+  const p = demoProject();
+  let s = settle(p, blankProgress());
+  assert.deepEqual(new Set(s.discovered), new Set(["harbor", "camp"]));
+  s = visit(p, "world", "harbor", s).state;
+  assert(s.discovered.includes("forest"));
+  let r = visit(p, "world", "forest", s);
+  assert.equal(r.mapId, "woods");
+  assert(r.state.completed.includes("entry"));
+  assert(!r.state.discovered.includes("ruins"));
+  assert(!r.state.discovered.includes("haven"));
+});
+test("keys unlock permanently, hidden nodes stay absent until their conditions pass", () => {
+  const p = demoProject();
+  let s = blankProgress();
+  for (const [m, id] of [
+    ["world", "harbor"],
+    ["world", "forest"],
+    ["woods", "fight1"],
+    ["woods", "rest1"],
+  ])
+    s = visit(p, m, id, s).state;
+  assert(s.discovered.includes("gate"));
+  assert(!s.unlocked.includes("gate"));
+  assert(!s.discovered.includes("secret"));
+  s = visit(p, "woods", "chest1", s).state;
+  assert(s.keys.includes("copper"));
+  assert(s.unlocked.includes("gate"));
+  s = settle(p, { ...s, keys: [] });
+  assert(s.unlocked.includes("gate"));
+  s = visit(p, "woods", "shop1", s).state;
+  assert(s.discovered.includes("secret"));
+});
+test("exit opens target and enters specified area entrance; town returns to world", () => {
+  const p = demoProject();
+  let s = blankProgress();
+  for (const [m, id] of [
+    ["world", "harbor"],
+    ["world", "forest"],
+    ["woods", "fight1"],
+    ["woods", "chest1"],
+    ["woods", "gate"],
+  ])
+    s = visit(p, m, id, s).state;
+  const r = visit(p, "woods", "out1", s);
+  assert.equal(r.mapId, "ruins-map");
+  assert(r.state.completed.includes("ruin-entry"));
+  assert(r.state.completed.includes("ruins"));
+  const town = visit(p, "woods", "out2", r.state);
+  assert.equal(town.mapId, "world");
+  assert(town.state.completed.includes("haven"));
+});
+test("arbitrary completed nodes can be revisited without sequential movement", () => {
+  const p = demoProject();
+  let s = blankProgress();
+  for (const [m, id] of [
+    ["world", "harbor"],
+    ["world", "forest"],
+    ["woods", "fight1"],
+    ["woods", "rest1"],
+  ])
+    s = visit(p, m, id, s).state;
+  const r = visit(p, "woods", "entry", s);
+  assert.equal(r.state.current, "entry");
+  assert(!r.error);
+});
+test("nested AND/OR and negative cross-area conditions", () => {
+  const s = { ...blankProgress(), keys: ["copper"], reached: ["entry"] };
+  assert(
+    conditionPass(
+      {
+        op: "all",
+        rules: [
+          { type: "key", ref: "moon", not: true },
+          {
+            op: "any",
+            rules: [
+              { type: "visited", ref: "entry", not: false },
+              { type: "key", ref: "moon", not: false },
+            ],
+          },
+        ],
+      },
+      s,
+    ),
+  );
+});
+test("directional routes and start conditions", () => {
+  const p = demoProject(),
+    w = p.maps[0];
+  w.nodes.find((n) => n.id === "camp").show = {
+    op: "all",
+    rules: [{ type: "key", ref: "moon", not: false }],
+  };
+  w.edges[0].directed = true;
+  let s = settle(p, blankProgress());
+  assert(!s.discovered.includes("camp"));
+  assert(!visit(p, "world", "camp", s).state.completed.includes("camp"));
+  assert(!s.discovered.includes("forest"));
+});
+test("JSON validates schema; invalid coordinate and node type are rejected", () => {
+  const p = demoProject();
+  assert.equal(parseProject(JSON.stringify(p)).maps.length, 3);
+  assert.equal(validate(p).length, 0);
+  assert.equal(worldEdges(p).filter((e) => e.generated).length, 3);
+  p.maps[0].nodes[0].z = 1;
+  assert.throws(() => parseProject(JSON.stringify(p)));
+  p.maps[0].nodes[0].z = 0;
+  p.maps[0].nodes[0].type = "chest";
+  assert.throws(() => parseProject(JSON.stringify(p)));
+});
+test("duplicating an area remaps local condition references and connections", () => {
+  const p = demoProject(),
+    source = p.maps[0].nodes.find((n) => n.id === "forest");
+  const copy = duplicateNode(p, "world", source, 120, 120, 0);
+  const area = p.maps.find((m) => m.id === copy.mapId);
+  assert.notEqual(copy.mapId, source.mapId);
+  assert.equal(area.nodes.length, 9);
+  assert(area.nodes.some((n) => n.id === area.defaultEntry));
+  const secret = area.nodes.find((n) => n.name === "月之秘藏"),
+    shop = area.nodes.find((n) => n.name === "树梢商人");
+  assert.equal(secret.show.rules[0].ref, shop.id);
+  assert.notEqual(shop.id, "shop1");
+  assert.doesNotThrow(() => parseProject(JSON.stringify(p)));
+  assert.doesNotThrow(() => parseProject(JSON.stringify(blankProject())));
+});
