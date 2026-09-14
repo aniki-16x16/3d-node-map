@@ -3,6 +3,7 @@ import type { EditorController } from "../../hooks/useEditorController";
 import Button from "../ui/Button";
 type Props = Pick<
   EditorController,
+  | "pickingNode"
   | "three"
   | "setThree"
   | "playing"
@@ -12,6 +13,7 @@ type Props = Pick<
   | "changeMap"
 >;
 export default function ViewSwitcher({
+  pickingNode,
   three,
   setThree,
   playing,
@@ -31,7 +33,9 @@ export default function ViewSwitcher({
             <strong>{map.name}</strong>
           </>
         )}
-        <span className="mode-tag">{playing ? "游玩预览" : "编辑模式"}</span>
+        <span className="mode-tag">
+          {pickingNode ? "拾取节点" : playing ? "游玩预览" : "编辑模式"}
+        </span>
       </div>
       <div className="view-toggle">
         <Button
@@ -44,6 +48,7 @@ export default function ViewSwitcher({
         </Button>
         <Button
           active={three}
+          disabled={pickingNode}
           title="3D 预览"
           onClick={() => {
             setThree(true);

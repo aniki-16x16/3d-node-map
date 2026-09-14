@@ -1,12 +1,13 @@
 import Select from "../ui/Select";
 import { Plus, X } from "lucide-react";
-import { emptyCondition, availableKeys } from "../../domain";
+import { emptyCondition, TYPES } from "../../domain";
 import type {
   Condition,
   ConditionGroup,
   ConditionRule,
   Project,
 } from "../../domain/types";
+import { useTargetSelection } from "./TargetSelectionContext";
 import Button from "../ui/Button";
 export default function ConditionEditor({
   value,
@@ -21,6 +22,7 @@ export default function ConditionEditor({
   mapId: string;
   depth?: number;
 }) {
+  const requestTarget = useTargetSelection();
   const update = (i: number, r: Condition) =>
     onChange({ ...value, rules: value.rules.map((x, j) => (i === j ? r : x)) });
   return (
@@ -45,7 +47,7 @@ export default function ConditionEditor({
                 ...value.rules,
                 {
                   type: "key",
-                  ref: availableKeys(project, mapId)[0]?.id || "",
+                  ref: "",
                   not: false,
                 },
               ],
@@ -102,28 +104,35 @@ export default function ConditionEditor({
                 <option value="false">有 / 是</option>
                 <option value="true">无 / 否</option>
               </Select>
-              <Select
-                aria-label="条件目标"
-                value={r.ref}
-                onChange={(e) => update(i, { ...r, ref: e.target.value })}
+              <Button
+                className="condition-target"
+                title="选择条件目标"
+                onClick={() =>
+                  requestTarget({
+                    type: r.type,
+                    ref: r.ref,
+                    mapId,
+                    onSelect: (ref) => update(i, { ...r, ref }),
+                  })
+                }
               >
-                <option value="">选择目标…</option>
                 {r.type === "key"
-                  ? availableKeys(project, mapId).map((k) => (
-                      <option key={k.id} value={k.id}>
-                        {k.name} · {k.mapId === null ? "全局" : "局部"}
-                      </option>
-                    ))
-                  : project.maps.map((m) => (
-                      <optgroup key={m.id} label={m.name}>
-                        {m.nodes.map((n) => (
-                          <option key={n.id} value={n.id}>
-                            {n.name}
-                          </option>
-                        ))}
-                      </optgroup>
-                    ))}
-              </Select>
+                  ? (() => {
+                      const k = project.keys.find((k) => k.id === r.ref);
+                      return k
+                        ? `${k.name || "未命名钥匙"} · ${k.mapId === null ? "世界" : project.maps.find((m) => m.id === k.mapId)?.name}`
+                        : "选择钥匙…";
+                    })()
+                  : (() => {
+                      const m = project.maps.find((m) =>
+                        m.nodes.some((n) => n.id === r.ref),
+                      );
+                      const n = m?.nodes.find((n) => n.id === r.ref);
+                      return n
+                        ? `${n.name} · ${m!.name} / Z ${n.z} · ${TYPES[n.type]}`
+                        : "选择节点…";
+                    })()}
+              </Button>
             </div>
           )}
           <Button

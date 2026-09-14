@@ -1,3 +1,7 @@
+import { useEffect, useRef } from "react";
+import TargetPicker from "./components/dialogs/TargetPicker";
+import NodePickOverlay from "./components/canvas/NodePickOverlay";
+import { TargetSelectionContext } from "./components/inspector/TargetSelectionContext";
 import { CheckCircle2 } from "lucide-react";
 import CanvasActions from "./components/canvas/CanvasActions";
 import MapActions from "./components/canvas/MapActions";
@@ -11,45 +15,62 @@ import MapSidebar from "./components/sidebar/MapSidebar";
 import { useEditorController } from "./hooks/useEditorController";
 export default function App() {
   const editor = useEditorController();
+  const inspector = useRef(editor);
+  useEffect(() => {
+    if (!editor.pickingNode) inspector.current = editor;
+  });
   return (
-    <div className="app">
-      <EditorHeader {...editor} />
-      <div className="workspace">
-        <MapSidebar {...editor} />
-        <main>
-          <ViewSwitcher {...editor} />
-          <MapViewport
-            {...editor}
-            captionActions={
-              <MapActions
-                key={`${editor.map.id}-${editor.readonly}`}
+    <TargetSelectionContext.Provider value={editor.requestTarget}>
+      <div className={`app ${editor.pickingNode ? "picking-node" : ""}`}>
+        <EditorHeader {...editor} />
+        <div className="workspace">
+          <MapSidebar {...editor} />
+          <main>
+            <ViewSwitcher {...editor} />
+            <MapViewport
+              {...editor}
+              captionActions={
+                <MapActions
+                  key={`${editor.map.id}-${editor.readonly}`}
+                  {...editor}
+                />
+              }
+            >
+              <CanvasActions
+                key={`${editor.map.id}-${editor.three}-${editor.playing}`}
                 {...editor}
               />
-            }
-          >
-            <CanvasActions
-              key={`${editor.map.id}-${editor.three}-${editor.playing}`}
-              {...editor}
-            />
-            <SelectionInspector {...editor} />
-          </MapViewport>
-          <StatusBar {...editor} />
-        </main>
-      </div>
-      <input
-        hidden
-        type="file"
-        accept=".json,application/json"
-        ref={editor.importer}
-        onChange={editor.importFile}
-      />
-      {editor.toast && (
-        <div role="status" className="toast">
-          <CheckCircle2 size={17} />
-          {editor.toast}
+              <div
+                className="inspector-host"
+                style={{
+                  visibility: editor.pickingNode ? "hidden" : undefined,
+                }}
+              >
+                <SelectionInspector
+                  {...(editor.pickingNode ? inspector.current : editor)}
+                />
+              </div>
+              <NodePickOverlay {...editor} />
+            </MapViewport>
+            <StatusBar {...editor} />
+          </main>
         </div>
-      )}
-      <EditorDialog {...editor} />
-    </div>
+        <input
+          hidden
+          type="file"
+          accept=".json,application/json"
+          ref={editor.importer}
+          onChange={editor.importFile}
+        />
+        {editor.toast && (
+          <div role="status" className="toast">
+            <CheckCircle2 size={17} />
+            {editor.toast}
+          </div>
+        )}
+        <EditorDialog {...editor} />
+        <TargetPicker {...editor} />
+      </div>
+    </TargetSelectionContext.Provider>
   );
 }

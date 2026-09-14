@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import type { TargetRequest } from "../components/inspector/TargetSelectionContext";
+import type { ViewTransform } from "./editorTypes";
 import { worldEdges } from "../domain/world";
 import { duplicateNode, newNode } from "../domain/project";
 import { deleteArea } from "../domain/deleteArea";
@@ -23,6 +25,21 @@ export function useEditorController() {
     [tool, setTool] = useState<EditorTool>("select");
   const [pending, setPending] = useState<PendingConnection | null>(null),
     [modal, setModal] = useState<Modal>(null);
+  const [targetRequest, setTargetRequest] = useState<TargetRequest | null>(
+    null,
+  );
+  const [targetSession, setTargetSession] = useState(0);
+  const [pickingNode, setPickingNode] = useState(false);
+  const pickOrigin = useRef<{
+    mapId: string;
+    layer: number;
+    selected: string | null;
+    selectedEdge: string | null;
+    view: ViewTransform;
+    three: boolean;
+    tool: EditorTool;
+    pending: PendingConnection | null;
+  } | null>(null);
   const [toast, setToast] = useState("");
   const didDrag = useRef(false);
   const notify = (message: string) => setToast(message);
@@ -59,7 +76,7 @@ export function useEditorController() {
     notify,
   });
   const { playing, activeProgress, setProgress } = preview,
-    readonly = playing || three;
+    readonly = playing || three || pickingNode;
   const visibleNodes = useMemo(
     () =>
       map.nodes.filter(
@@ -83,6 +100,65 @@ export function useEditorController() {
     setSelected,
     setSelectedEdge,
     didDrag,
+  });
+  const startNodePick = () => {
+    pickOrigin.current = {
+      mapId,
+      layer,
+      selected,
+      selectedEdge,
+      view: { ...viewport.view },
+      three,
+      tool,
+      pending,
+    };
+    setPickingNode(true);
+    setSelected(null);
+    setSelectedEdge(null);
+    setPending(null);
+    setThree(false);
+    setTool("select");
+  };
+  const finishNodePick = (id?: string) => {
+    const origin = pickOrigin.current;
+    if (!origin) return;
+    if (id && targetRequest) {
+      targetRequest.onSelect(id);
+      setTargetRequest({ ...targetRequest, ref: id });
+    }
+    setMapId(origin.mapId);
+    setLayer(origin.layer);
+    setSelected(origin.selected);
+    setSelectedEdge(origin.selectedEdge);
+    viewport.setView(origin.view);
+    setThree(origin.three);
+    setTool(origin.tool);
+    setPending(origin.pending);
+    setPickingNode(false);
+    pickOrigin.current = null;
+  };
+  useEffect(() => {
+    if (!pickingNode) return;
+    const keydown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        finishNodePick();
+      } else if (
+        !(e.target as HTMLElement).closest("input, select, textarea, button")
+      ) {
+        if (e.key === "PageUp" || e.key === "PageDown") {
+          e.preventDefault();
+          setLayer((z) =>
+            map.kind === "world" ? 0 : z + (e.key === "PageUp" ? 1 : -1),
+          );
+        }
+        if (e.key === "v") setTool("select");
+        if (e.key === "h") setTool("hand");
+      }
+    };
+    window.addEventListener("keydown", keydown, true);
+    return () => window.removeEventListener("keydown", keydown, true);
   });
   const actions = useNodeActions({
     map,
@@ -158,6 +234,7 @@ export function useEditorController() {
   };
   useEditorShortcuts({
     readonly,
+    pickingNode,
     node,
     map,
     layer,
@@ -193,13 +270,11 @@ export function useEditorController() {
     selectedEdge,
     setSelectedEdge,
     three,
-    setThree,
     tool,
     setTool,
     pending,
     setPending,
     modal,
-    setModal,
     toast,
     notify,
     commit,
@@ -218,6 +293,33 @@ export function useEditorController() {
     ...viewport,
     ...actions,
     ...files,
+    pickingNode,
+    targetRequest,
+    targetSession,
+    requestTarget: (request: TargetRequest) => {
+      setTargetSession((session) => session + 1);
+      setTargetRequest(request);
+    },
+    closeTarget: () => setTargetRequest(null),
+    startNodePick,
+    finishNodePick,
+    onNode: (id: string) => {
+      if (pickingNode) {
+        if (!didDrag.current) {
+          setSelected(id);
+          setSelectedEdge(null);
+        }
+      } else preview.onNode(id);
+    },
+    setModal: (value: Modal) => {
+      if (!pickingNode) setModal(value);
+    },
+    setThree: (value: boolean) => {
+      if (!pickingNode) setThree(value);
+    },
+    togglePlay: () => {
+      if (!pickingNode) preview.togglePlay();
+    },
   };
 }
 export type EditorController = ReturnType<typeof useEditorController>;

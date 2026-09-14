@@ -11,6 +11,7 @@ import type { EditorController } from "../../hooks/useEditorController";
 import Button from "../ui/Button";
 type Props = Pick<
   EditorController,
+  | "pickingNode"
   | "project"
   | "playing"
   | "setModal"
@@ -20,6 +21,7 @@ type Props = Pick<
   | "togglePlay"
 >;
 export default function EditorHeader({
+  pickingNode,
   project,
   playing,
   setModal,
@@ -42,7 +44,11 @@ export default function EditorHeader({
       <div className="project-title">
         <span className="divider" />
         {project.name}
-        <button title="项目设置" onClick={() => setModal("settings")}>
+        <button
+          disabled={pickingNode}
+          title="项目设置"
+          onClick={() => setModal("settings")}
+        >
           <ChevronDown size={14} />
         </button>
         <span className="saved">
@@ -51,6 +57,7 @@ export default function EditorHeader({
       </div>
       <div className="header-actions">
         <Button
+          disabled={pickingNode}
           className="key-manager-trigger"
           title="管理钥匙"
           onClick={() => setModal("keys")}
@@ -60,7 +67,7 @@ export default function EditorHeader({
         </Button>
         <Button
           title="导入地图 JSON"
-          disabled={playing}
+          disabled={playing || pickingNode}
           onClick={() => importer.current?.click()}
         >
           <Upload size={16} />
@@ -72,6 +79,7 @@ export default function EditorHeader({
         </Button>
         <Button
           className={playing ? "stop-button" : "primary"}
+          disabled={pickingNode}
           title={playing ? "结束预览" : "开始游玩预览"}
           onClick={togglePlay}
         >

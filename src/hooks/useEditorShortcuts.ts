@@ -11,6 +11,7 @@ import type {
 } from "./editorTypes";
 interface Options {
   readonly: boolean;
+  pickingNode: boolean;
   node: MapNode | undefined;
   map: AtlasMap;
   layer: number;
@@ -27,6 +28,7 @@ interface Options {
 }
 export function useEditorShortcuts({
   readonly,
+  pickingNode,
   node,
   map,
   layer,
@@ -44,6 +46,7 @@ export function useEditorShortcuts({
   const [clipboard, setClipboard] = useState<MapNode | null>(null);
   useEffect(() => {
     const listener = (e: KeyboardEvent) => {
+      if (pickingNode) return;
       if (
         e.defaultPrevented ||
         (e.target as HTMLElement).closest(

@@ -3,6 +3,7 @@ import type { EditorController } from "../../hooks/useEditorController";
 import PreviewPanel from "./PreviewPanel";
 type Props = Pick<
   EditorController,
+  | "pickingNode"
   | "project"
   | "setLayer"
   | "playing"
@@ -15,6 +16,7 @@ type Props = Pick<
   | "changeMap"
 >;
 export default function MapSidebar({
+  pickingNode,
   project,
   setLayer,
   playing,
@@ -107,12 +109,12 @@ export default function MapSidebar({
         </div>
       )}
       <div className="sidebar-bottom">
-        <button onClick={() => setModal("validation")}>
+        <button disabled={pickingNode} onClick={() => setModal("validation")}>
           <CheckCircle2 size={16} />
           地图校验
           <ChevronRight size={14} />
         </button>
-        <button onClick={() => setModal("help")}>
+        <button disabled={pickingNode} onClick={() => setModal("help")}>
           <CircleHelp size={16} />
           操作指南<span>?</span>
         </button>

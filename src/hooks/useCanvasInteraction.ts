@@ -68,7 +68,7 @@ export function useCanvasInteraction({
       )
     )
       return;
-    if (id && readonly) {
+    if (id && readonly && tool !== "hand" && e.button !== 1) {
       e.stopPropagation();
       return;
     }
