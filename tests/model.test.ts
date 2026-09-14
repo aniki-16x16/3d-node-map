@@ -31,7 +31,9 @@ test("keys unlock permanently, hidden nodes stay absent until their conditions p
     ["world", "harbor"],
     ["world", "forest"],
     ["woods", "fight1"],
+    ["woods", "forest-fork"],
     ["woods", "rest1"],
+    ["woods", "forest-merge"],
   ])
     s = visit(p, m, id, s).state;
   assert(s.discovered.includes("gate"));
@@ -52,8 +54,11 @@ test("exit opens target and enters specified area entrance; town returns to worl
     ["world", "harbor"],
     ["world", "forest"],
     ["woods", "fight1"],
+    ["woods", "forest-fork"],
     ["woods", "chest1"],
+    ["woods", "forest-merge"],
     ["woods", "gate"],
+    ["woods", "exit-fork"],
   ])
     s = visit(p, m, id, s).state;
   const r = visit(p, "woods", "out1", s);
@@ -71,7 +76,9 @@ test("arbitrary completed nodes can be revisited without sequential movement", (
     ["world", "harbor"],
     ["world", "forest"],
     ["woods", "fight1"],
+    ["woods", "forest-fork"],
     ["woods", "rest1"],
+    ["woods", "forest-merge"],
   ])
     s = visit(p, m, id, s).state;
   const r = visit(p, "woods", "entry", s);
@@ -129,7 +136,10 @@ test("duplicating an area remaps local condition references and connections", ()
   const copy = duplicateNode(p, "world", source, 120, 120, 0);
   const area = p.maps.find((m) => m.id === copy.mapId)!;
   assert.notEqual(copy.mapId, source.mapId);
-  assert.equal(area.nodes.length, 9);
+  assert.equal(
+    area.nodes.length,
+    p.maps.find((m) => m.id === source.mapId)!.nodes.length,
+  );
   assert(area.nodes.some((n) => n.id === area.defaultEntry));
   const secret = area.nodes.find((n) => n.name === "月之秘藏")!,
     shop = area.nodes.find((n) => n.name === "树梢商人")!;
