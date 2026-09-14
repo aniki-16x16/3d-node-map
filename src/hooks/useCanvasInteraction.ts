@@ -1,5 +1,6 @@
 import type { PointerEvent as ReactPointerEvent, RefObject } from "react";
 import { useEffect, useRef, useState } from "react";
+import { snapCoordinate } from "../domain/layout";
 import type { AtlasMap, MapNode, Project } from "../domain/types";
 import type { EditorTool, Setter, ViewTransform } from "./editorTypes";
 interface Options {
@@ -119,8 +120,8 @@ export function useCanvasInteraction({
                     ? n
                     : {
                         ...n,
-                        x: Math.round((g.x + dx / view.k) / 10) * 10,
-                        y: Math.round((g.y + dy / view.k) / 10) * 10,
+                        x: snapCoordinate(g.x + dx / view.k),
+                        y: snapCoordinate(g.y + dy / view.k),
                       },
                 ),
               },

@@ -1,5 +1,5 @@
 import { Box, Layers3, Link2, MousePointer2, X } from "lucide-react";
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import type { EditorController } from "../../hooks/useEditorController";
 import Button from "../ui/Button";
 import CanvasToolbar from "./CanvasToolbar";
@@ -78,10 +78,18 @@ export default function MapViewport({
   children,
   captionActions,
 }: Props) {
+  const [reference, setReference] = useState<{
+    mapId: string;
+    layer: number | null;
+  }>({ mapId: map.id, layer: null });
+  const referenceLayer = reference.mapId === map.id ? reference.layer : null;
+  const setReferenceLayer = (value: number | null) =>
+    setReference({ mapId: map.id, layer: value });
   return (
     <div
       className={`canvas ${tool === "hand" ? "hand-tool" : ""} ${drag ? "dragging" : ""}`}
       ref={canvas}
+      tabIndex={-1}
       onPointerDown={(e) => !three && pointerDown(e)}
       onPointerMove={pointerMove}
       onPointerUp={pointerUp}
@@ -99,6 +107,7 @@ export default function MapViewport({
         />
       ) : (
         <Graph2D
+          referenceLayer={map.kind === "area" ? referenceLayer : null}
           {...{
             layer,
             setLayer,
@@ -150,7 +159,9 @@ export default function MapViewport({
         </div>
       )}
       {map.kind === "area" && !three && (
-        <LayerControl {...{ layer, setLayer, layers }} />
+        <LayerControl
+          {...{ layer, setLayer, layers, referenceLayer, setReferenceLayer }}
+        />
       )}
       <div className="bottom-hint">
         {three ? (

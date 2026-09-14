@@ -1,7 +1,9 @@
 import type { EditorController } from "../../hooks/useEditorController";
+import ReferenceLayer from "./ReferenceLayer";
+import { SNAP_STEP } from "../../domain/layout";
 import GraphEdges from "./GraphEdges";
 import GraphNodes from "./GraphNodes";
-type Props = Pick<
+type Props = { referenceLayer: number | null } & Pick<
   EditorController,
   | "layer"
   | "setLayer"
@@ -24,6 +26,7 @@ type Props = Pick<
 >;
 export default function Graph2D({
   layer,
+  referenceLayer,
   setLayer,
   selected,
   setSelected,
@@ -47,7 +50,7 @@ export default function Graph2D({
       <div
         className="grid"
         style={{
-          backgroundSize: `${28 * view.k}px ${28 * view.k}px`,
+          backgroundSize: `${SNAP_STEP * view.k}px ${SNAP_STEP * view.k}px`,
           backgroundPosition: `${view.x}px ${view.y}px`,
         }}
       />
@@ -75,6 +78,13 @@ export default function Graph2D({
           ))}
         </defs>
         <g transform={`translate(${view.x} ${view.y}) scale(${view.k})`}>
+          {referenceLayer !== null && referenceLayer !== layer && (
+            <ReferenceLayer
+              layer={referenceLayer}
+              nodes={visibleNodes}
+              edges={edges}
+            />
+          )}
           <GraphEdges
             {...{
               layer,

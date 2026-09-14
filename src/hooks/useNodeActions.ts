@@ -1,4 +1,5 @@
 import type { RefObject } from "react";
+import { snapCoordinate } from "../domain/layout";
 import { duplicateNode, newNode, uid } from "../domain/project";
 import type {
   AtlasMap,
@@ -101,9 +102,8 @@ export function useNodeActions({
     const r = canvas.current!.getBoundingClientRect();
     const n = newNode(
       type,
-      Math.round((position?.x ?? (r.width * 0.45 - view.x) / view.k) / 20) * 20,
-      Math.round((position?.y ?? (r.height * 0.45 - view.y) / view.k) / 20) *
-        20,
+      snapCoordinate(position?.x ?? (r.width * 0.45 - view.x) / view.k),
+      snapCoordinate(position?.y ?? (r.height * 0.45 - view.y) / view.k),
       map.kind === "world" ? 0 : layer,
     );
     commit((p) => {

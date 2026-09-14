@@ -50,6 +50,7 @@ export default function CanvasActions({
   }, [layer]);
   const pointer = useRef<Point | null>(null);
   const wheelTime = useRef(0);
+  const usedAltWheel = useRef(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const types: NodeType[] =
     map.kind === "world"
@@ -134,6 +135,9 @@ export default function CanvasActions({
       if (!menuRef.current?.contains(e.target as Node)) setMenu(null);
     };
     const key = (e: KeyboardEvent) => {
+      if (e.key === "Alt" && pointer.current && !three && !modal) {
+        e.preventDefault();
+      }
       if (e.key === "Escape" && menu) {
         e.preventDefault();
         e.stopImmediatePropagation();
@@ -148,7 +152,7 @@ export default function CanvasActions({
         )
       )
         return;
-      if (e.ctrlKey || e.metaKey || e.altKey || three) return;
+      if (e.ctrlKey || e.metaKey || three) return;
       if (e.key === "PageUp" || e.key === "PageDown") {
         if (map.kind !== "area") return;
         e.preventDefault();
@@ -161,6 +165,7 @@ export default function CanvasActions({
         return;
       }
       if (
+        e.altKey ||
         readonly ||
         e.shiftKey ||
         e.repeat ||
@@ -178,11 +183,20 @@ export default function CanvasActions({
       if (!e.altKey || three || modal || blocked(e.target)) return;
       e.preventDefault();
       if (map.kind !== "area" || !e.deltaY) return;
+      usedAltWheel.current = true;
+      el.focus({ preventScroll: true });
       const now = performance.now();
       if (now - wheelTime.current < 160) return;
       wheelTime.current = now;
       setLayer(layer + (e.deltaY < 0 ? 1 : -1));
       setMenu(null);
+    };
+    const keyUp = (e: KeyboardEvent) => {
+      if (e.key === "Alt" && usedAltWheel.current) {
+        e.preventDefault();
+        usedAltWheel.current = false;
+        el.focus({ preventScroll: true });
+      }
     };
     el.addEventListener("pointermove", track);
     el.addEventListener("pointerleave", leave);
@@ -190,6 +204,7 @@ export default function CanvasActions({
     el.addEventListener("wheel", wheel, { passive: false });
     window.addEventListener("pointerdown", close, true);
     window.addEventListener("keydown", key, true);
+    window.addEventListener("keyup", keyUp, true);
     return () => {
       el.removeEventListener("pointermove", track);
       el.removeEventListener("pointerleave", leave);
@@ -197,6 +212,7 @@ export default function CanvasActions({
       el.removeEventListener("wheel", wheel);
       window.removeEventListener("pointerdown", close, true);
       window.removeEventListener("keydown", key, true);
+      window.removeEventListener("keyup", keyUp, true);
     };
   });
   if (!menu || readonly || modal) return null;

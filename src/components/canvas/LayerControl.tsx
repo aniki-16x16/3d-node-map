@@ -1,10 +1,22 @@
 import { Layers3, Minus, Plus } from "lucide-react";
 import type { EditorController } from "../../hooks/useEditorController";
 import Button from "../ui/Button";
-type Props = Pick<EditorController, "layer" | "setLayer" | "layers">;
-export default function LayerControl({ layer, setLayer, layers }: Props) {
+type Props = Pick<EditorController, "layer" | "setLayer" | "layers"> & {
+  referenceLayer: number | null;
+  setReferenceLayer: (layer: number | null) => void;
+};
+export default function LayerControl({
+  layer,
+  setLayer,
+  layers,
+  referenceLayer,
+  setReferenceLayer,
+}: Props) {
   return (
-    <div className="layer-control">
+    <div
+      className="layer-control canvas-ui"
+      onPointerDown={(e) => e.stopPropagation()}
+    >
       <div>
         <Layers3 size={15} />
         <span>楼层</span>
@@ -43,6 +55,40 @@ export default function LayerControl({ layer, setLayer, layers }: Props) {
           if (Number.isInteger(z)) setLayer(z);
         }}
       />
+      <label className="reference-control">
+        参考层
+        <select
+          aria-label="参考层"
+          value={referenceLayer ?? "off"}
+          onChange={(e) => {
+            setReferenceLayer(
+              e.target.value === "off" ? null : Number(e.target.value),
+            );
+            e.target.blur();
+          }}
+        >
+          <option value="off">关闭</option>
+          {[
+            ...new Set([
+              ...layers,
+              ...(referenceLayer === null ? [] : [referenceLayer]),
+            ]),
+          ]
+            .sort((a, b) => b - a)
+            .map((z) => (
+              <option key={z} value={z}>
+                Z {z > 0 ? "+" : ""}
+                {z}
+                {z === layer ? "（当前）" : ""}
+              </option>
+            ))}
+        </select>
+      </label>
+      {referenceLayer !== null && (
+        <small className="reference-note">
+          {referenceLayer === layer ? "同层，暂停叠加" : "半透明 · 仅供对照"}
+        </small>
+      )}
     </div>
   );
 }

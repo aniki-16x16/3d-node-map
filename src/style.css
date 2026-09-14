@@ -1405,3 +1405,36 @@ footer i {
   font-size: 9px;
   color: #94aea2;
 }
+
+.canvas:focus {
+  outline: none;
+}
+.reference-layer {
+  opacity: 0.32;
+}
+.reference-layer,
+.reference-layer * {
+  pointer-events: none !important;
+}
+.reference-control {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  border-top: 1px solid #35424d;
+  padding-top: 8px;
+  margin-top: 3px;
+  color: #91a6b2;
+  font-size: 10px;
+  text-align: center;
+}
+.reference-control select {
+  max-width: 100%;
+}
+.reference-note {
+  font-size: 9px;
+  color: #91a6b2;
+  text-align: center;
+}
+.layer-control {
+  width: 100px;
+}
