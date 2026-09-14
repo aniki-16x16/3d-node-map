@@ -83,11 +83,14 @@ export function buildMapObjects(
       new THREE.MeshBasicMaterial({
         color: locked
           ? "#242c36"
-          : done || n.id === selected
-            ? "#294b3b"
-            : "#1d2c37",
+          : n.type === "structure"
+            ? "#c9d1d8"
+            : done || n.id === selected
+              ? "#294b3b"
+              : "#1d2c37",
       }),
     );
+    if (n.type === "structure") mesh.geometry.scale(0.75, 0.75, 1);
     mesh.rotation.x = -Math.PI / 2;
     mesh.position.copy(pos(n));
     mesh.userData.id = n.id;
@@ -100,26 +103,28 @@ export function buildMapObjects(
       }),
     );
     mesh.add(border);
-    const svg = renderToStaticMarkup(
-      React.createElement(locked ? LockKeyhole : icons[n.type], {
-        size: 96,
-        color: locked ? "#81909a" : colors[n.type],
-        strokeWidth: 1.6,
-      }),
-    );
-    const iconTexture = new THREE.TextureLoader().load(
-      `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`,
-    );
-    const icon = new THREE.Sprite(
-      new THREE.SpriteMaterial({
-        map: iconTexture,
-        transparent: true,
-        depthTest: false,
-      }),
-    );
-    icon.position.copy(pos(n).add(new THREE.Vector3(0, 19, 0)));
-    icon.scale.set(26, 26, 1);
-    scene.add(icon);
+    if (n.type !== "structure") {
+      const svg = renderToStaticMarkup(
+        React.createElement(locked ? LockKeyhole : icons[n.type], {
+          size: 96,
+          color: locked ? "#81909a" : colors[n.type],
+          strokeWidth: 1.6,
+        }),
+      );
+      const iconTexture = new THREE.TextureLoader().load(
+        `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`,
+      );
+      const icon = new THREE.Sprite(
+        new THREE.SpriteMaterial({
+          map: iconTexture,
+          transparent: true,
+          depthTest: false,
+        }),
+      );
+      icon.position.copy(pos(n).add(new THREE.Vector3(0, 19, 0)));
+      icon.scale.set(26, 26, 1);
+      scene.add(icon);
+    }
     label(
       n.name,
       pos(n).add(new THREE.Vector3(0, 1, 68)),

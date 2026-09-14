@@ -19,6 +19,7 @@ export default function NodePalette({ three, map, addNode }: Props) {
                 "chest",
                 "entrance",
                 "exit",
+                "structure",
               ]) as NodeType[]
         ).map((type) => {
           const Icon = ICONS[type];

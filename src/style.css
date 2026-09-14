@@ -1581,3 +1581,53 @@ footer .status-info {
 .drawer {
   bottom: 120px;
 }
+
+.map-node .structure-shape {
+  fill: #c9d1d8;
+  stroke: #edf2f5;
+}
+.map-node:hover .structure-shape {
+  fill: #eef2f5;
+}
+.map-node.selected .structure-shape {
+  fill: #f4f7f9;
+  stroke: #fff;
+}
+.node-tool-card {
+  isolation: isolate;
+  overflow: hidden;
+  padding: 8px 4px;
+}
+.node-tool-card > svg,
+.node-tool-card > span {
+  position: relative;
+  z-index: 1;
+}
+.node-tool-card kbd {
+  inset: auto;
+  left: 1px;
+  bottom: -8px;
+  width: auto;
+  height: auto;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  color: #101c25;
+  font-size: 83px;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -7px;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.node-tools .node-tool-card {
+  width: 68px;
+  height: 68px;
+}
+@media (max-width: 1150px) {
+  .node-tools .node-tool-card {
+    width: 60px;
+    height: 60px;
+  }
+}

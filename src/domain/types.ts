@@ -7,7 +7,8 @@ export type NodeType =
   | "checkpoint"
   | "chest"
   | "entrance"
-  | "exit";
+  | "exit"
+  | "structure";
 export type Port = "top" | "right" | "bottom" | "left";
 export interface Point {
   x: number;

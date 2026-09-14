@@ -94,6 +94,7 @@ export function useEditorShortcuts({
                   "chest",
                   "entrance",
                   "exit",
+                  "structure",
                 ]
           ).includes(clipboard.type)
         ) {

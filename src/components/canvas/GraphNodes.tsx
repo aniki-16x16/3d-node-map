@@ -60,19 +60,20 @@ export default function GraphNodes({
               }}
             >
               <rect
-                className="diamond"
+                className={`diamond ${n.type === "structure" ? "structure-shape" : ""}`}
                 x="-24"
                 y="-24"
                 width="48"
                 height="48"
                 rx="5"
-                transform="rotate(45)"
+                transform={`rotate(45) scale(${n.type === "structure" ? 0.75 : 1})`}
               />
-              {locked ? (
-                <LockKeyhole x={-11} y={-11} size={22} />
-              ) : (
-                <Icon x={-12} y={-12} size={24} />
-              )}
+              {n.type !== "structure" &&
+                (locked ? (
+                  <LockKeyhole x={-11} y={-11} size={22} />
+                ) : (
+                  <Icon x={-12} y={-12} size={24} />
+                ))}
               <text y="62" textAnchor="middle" className="node-name">
                 {n.name}
               </text>
@@ -92,8 +93,8 @@ export default function GraphNodes({
                 Object.entries(ports).map(([port, [x, y]]) => (
                   <circle
                     key={port}
-                    cx={x}
-                    cy={y}
+                    cx={x * (n.type === "structure" ? 0.75 : 1)}
+                    cy={y * (n.type === "structure" ? 0.75 : 1)}
                     r="6"
                     className={`port ${pending?.id === n.id && pending.port === port ? "pending" : ""}`}
                     onPointerDown={(e) => e.stopPropagation()}

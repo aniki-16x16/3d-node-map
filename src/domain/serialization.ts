@@ -35,7 +35,16 @@ function node(v: unknown, kind: AtlasMap["kind"]): v is MapNode {
     typeof v.name === "string" &&
     (kind === "world"
       ? ["town", "region"]
-      : ["battle", "shop", "rest", "checkpoint", "chest", "entrance", "exit"]
+      : [
+          "battle",
+          "shop",
+          "rest",
+          "checkpoint",
+          "chest",
+          "entrance",
+          "exit",
+          "structure",
+        ]
     ).includes(String(v.type)) &&
     typeof v.x === "number" &&
     Number.isFinite(v.x) &&

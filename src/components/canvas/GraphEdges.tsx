@@ -1,4 +1,5 @@
-import { ports, route } from "../../domain";
+import { route } from "../../domain";
+import { portOffset } from "../../domain/routing";
 import type { EditorController } from "../../hooks/useEditorController";
 type Props = Pick<
   EditorController,
@@ -39,7 +40,7 @@ export default function GraphEdges({
             const local = a.z === layer ? a : b,
               remote = a.z === layer ? b : a,
               port = a.z === layer ? e.ap : e.bp,
-              offset = ports[port],
+              offset = portOffset(local, port),
               tx = local.x + offset[0] * 4,
               ty = local.y + offset[1] * 4;
             return (

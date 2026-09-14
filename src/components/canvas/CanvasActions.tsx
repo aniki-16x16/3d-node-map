@@ -62,7 +62,16 @@ export default function CanvasActions({
   const types: NodeType[] =
     map.kind === "world"
       ? ["town", "region"]
-      : ["battle", "shop", "rest", "checkpoint", "chest", "entrance", "exit"];
+      : [
+          "battle",
+          "shop",
+          "rest",
+          "checkpoint",
+          "chest",
+          "entrance",
+          "exit",
+          "structure",
+        ];
   const moveNode = (z: number) => {
     if (readonly || !node || map.kind !== "area" || !Number.isSafeInteger(z))
       return;

@@ -39,15 +39,15 @@ export default function ReferenceLayer({
             style={{ "--node-color": colors[node.type] } as CSSProperties}
           >
             <rect
-              className="diamond"
+              className={`diamond ${node.type === "structure" ? "structure-shape" : ""}`}
               x="-24"
               y="-24"
               width="48"
               height="48"
               rx="5"
-              transform="rotate(45)"
+              transform={`rotate(45) scale(${node.type === "structure" ? 0.75 : 1})`}
             />
-            <Icon x={-12} y={-12} size={24} />
+            {node.type !== "structure" && <Icon x={-12} y={-12} size={24} />}
             <text y="62" textAnchor="middle" className="node-name">
               {node.name}
             </text>

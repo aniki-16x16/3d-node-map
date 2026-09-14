@@ -1,5 +1,6 @@
 import type { ConditionGroup, MapNode, NodeType, Project } from "./types";
 export const TYPES: Record<NodeType, string> = {
+  structure: "结构",
   town: "城镇",
   region: "战斗区域",
   battle: "战斗",
