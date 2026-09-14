@@ -1,6 +1,7 @@
-import { X } from "lucide-react";
+import { useState } from "react";
 import type { EditorController } from "../../hooks/useEditorController";
-import Button from "../ui/Button";
+import Modal from "../ui/Modal";
+import { KeyRound } from "lucide-react";
 import HelpContent from "./HelpContent";
 import PreviewDebug from "./PreviewDebug";
 import KeyManager from "./KeyManager";
@@ -37,75 +38,64 @@ export default function EditorDialog({
   loadDemo,
   restoreSavedProject,
 }: Props) {
+  const [lastModal, setLastModal] = useState(modal);
+  if (modal && modal !== lastModal) setLastModal(modal);
+  const shown = modal ?? lastModal;
+  const title =
+    shown === "help"
+      ? "操作指南"
+      : shown === "validation"
+        ? "地图校验"
+        : shown === "debug"
+          ? "预览调试"
+          : shown === "keys"
+            ? "钥匙管理"
+            : "项目设置";
   return (
-    <div className="modal-backdrop" onClick={() => setModal(null)}>
-      <section
-        className="modal"
-        role="dialog"
-        aria-modal="true"
-        aria-label={
-          modal === "help"
-            ? "操作指南"
-            : modal === "validation"
-              ? "地图校验"
-              : modal === "debug"
-                ? "预览调试"
-                : modal === "keys"
-                  ? "钥匙管理"
-                  : "项目设置"
-        }
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="modal-title">
-          <h2>
-            {modal === "help"
-              ? "操作指南"
-              : modal === "validation"
-                ? "地图校验"
-                : modal === "debug"
-                  ? "预览调试"
-                  : modal === "keys"
-                    ? "钥匙管理"
-                    : "项目设置"}
-          </h2>
-          <Button title="关闭" onClick={() => setModal(null)}>
-            <X size={19} />
-          </Button>
-        </div>
-        {modal === "keys" ? (
-          <KeyManager {...{ project, map, readonly, commit }} />
-        ) : modal === "settings" ? (
-          <ProjectSettings
-            {...{
-              project,
-              setProgress,
-              setModal,
-              map,
-              readonly,
-              notify,
-              commit,
-              changeMap,
-              loadDemo,
-              restoreSavedProject,
-            }}
-          />
-        ) : modal === "debug" ? (
-          <PreviewDebug
-            {...{
-              project,
-              setProgress,
-              setModal,
-              world,
-              activeProgress,
-              changeMap,
-            }}
-          />
-        ) : modal === "validation" ? (
-          <ValidationResults {...{ project }} />
-        ) : (
-          <HelpContent {...{}} />
-        )}
-      </section>
-    </div>
+    <Modal
+      open={modal !== null}
+      onClose={() => setModal(null)}
+      className={shown === "keys" ? "key-modal" : ""}
+      title={
+        <>
+          {shown === "keys" && <KeyRound size={22} />}
+          {title}
+        </>
+      }
+    >
+      {shown === "keys" ? (
+        <KeyManager key={map.id} {...{ project, map, readonly, commit }} />
+      ) : shown === "settings" ? (
+        <ProjectSettings
+          {...{
+            project,
+            setProgress,
+            setModal,
+            map,
+            readonly,
+            notify,
+            commit,
+            changeMap,
+            loadDemo,
+            restoreSavedProject,
+          }}
+        />
+      ) : shown === "debug" ? (
+        <PreviewDebug
+          {...{
+            project,
+            setProgress,
+            setModal,
+            world,
+            activeProgress,
+            changeMap,
+          }}
+        />
+      ) : shown === "validation" ? (
+        <ValidationResults {...{ project }} />
+      ) : (
+        <HelpContent {...{}} />
+      )}
+    </Modal>
   );
 }

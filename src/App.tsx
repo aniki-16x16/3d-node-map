@@ -49,7 +49,7 @@ export default function App() {
           {editor.toast}
         </div>
       )}
-      {editor.modal && <EditorDialog {...editor} />}
+      <EditorDialog {...editor} />
     </div>
   );
 }

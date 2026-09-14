@@ -50,7 +50,11 @@ export default function EditorHeader({
         </span>
       </div>
       <div className="header-actions">
-        <Button title="管理钥匙" onClick={() => setModal("keys")}>
+        <Button
+          className="key-manager-trigger"
+          title="管理钥匙"
+          onClick={() => setModal("keys")}
+        >
           <KeyRound size={16} />
           钥匙管理
         </Button>
