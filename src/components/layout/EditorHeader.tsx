@@ -1,5 +1,6 @@
 import {
   ChevronDown,
+  KeyRound,
   Compass,
   Download,
   Play,
@@ -49,6 +50,10 @@ export default function EditorHeader({
         </span>
       </div>
       <div className="header-actions">
+        <Button title="管理钥匙" onClick={() => setModal("keys")}>
+          <KeyRound size={16} />
+          钥匙管理
+        </Button>
         <Button
           title="导入地图 JSON"
           disabled={playing}

@@ -14,6 +14,7 @@ export function deleteArea(project: Project, id: string) {
     for (const rule of group.rules) if ("op" in rule) clean(rule);
   };
   project.maps = project.maps.filter((map) => map.id !== id);
+  project.keys = project.keys.filter((k) => k.mapId !== id);
   for (const map of project.maps) {
     map.nodes = map.nodes.filter((node) => !removed.has(node.id));
     map.edges = map.edges.filter(

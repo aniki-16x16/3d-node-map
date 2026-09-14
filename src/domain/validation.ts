@@ -1,15 +1,16 @@
-import { allNodes } from "./project";
+import { allNodes, availableKeys } from "./project";
 import type { ConditionGroup, Project } from "./types";
 export function validate(p: Project): string[] {
   const errors: string[] = [],
     nodes = allNodes(p),
     ids = new Set(nodes.map((n) => n.id));
-  const check = (c: ConditionGroup, name: string): void =>
+  const check = (c: ConditionGroup, name: string, mapId: string): void =>
     c?.rules?.forEach((r) =>
       r.rules
-        ? check(r, name)
-        : !(r.type === "key" ? p.keys : nodes).some((i) => i.id === r.ref) &&
-          errors.push(`${name}：条件引用已失效`),
+        ? check(r, name, mapId)
+        : !(r.type === "key" ? availableKeys(p, mapId) : nodes).some(
+            (i) => i.id === r.ref,
+          ) && errors.push(`${name}：条件引用已失效`),
     );
   if (ids.size !== nodes.length) errors.push("节点 ID 重复");
   const world = p.maps.find((m) => m.kind === "world")!;
@@ -21,8 +22,12 @@ export function validate(p: Project): string[] {
     )
       errors.push(`${m.name}：未设置默认入口`);
     for (const n of m.nodes) {
-      check(n.show, n.name);
-      check(n.enter, n.name);
+      check(n.show, n.name, m.id);
+      check(n.enter, n.name, m.id);
+      if (
+        n.rewards.some((id) => !availableKeys(p, m.id).some((k) => k.id === id))
+      )
+        errors.push(`${n.name}：奖励钥匙失效或不属于当前地图`);
       if (
         n.type === "region" &&
         !p.maps.some((m) => m.id === n.mapId && m.kind === "area")

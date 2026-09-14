@@ -38,7 +38,10 @@ export default function PreviewDebug({
               }))
             }
           />
-          {k.name}
+          {k.name} ·{" "}
+          {k.mapId === null
+            ? "全局"
+            : project.maps.find((m) => m.id === k.mapId)?.name}
         </label>
       ))}
       <Button

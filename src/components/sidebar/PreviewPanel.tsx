@@ -42,7 +42,10 @@ export default function PreviewPanel({
             className={activeProgress.keys.includes(k.id) ? "owned" : ""}
           >
             <KeyRound size={14} />
-            {k.name}
+            {k.name} ·{" "}
+            {k.mapId === null
+              ? "全局"
+              : project.maps.find((m) => m.id === k.mapId)?.name}
             {activeProgress.keys.includes(k.id) && <Check size={13} />}
           </div>
         ))}

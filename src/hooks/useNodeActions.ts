@@ -77,8 +77,10 @@ export function useNodeActions({
         if (
           removed?.type === "region" &&
           !m.nodes.some((n) => n.mapId === removed.mapId)
-        )
+        ) {
           p.maps = p.maps.filter((a) => a.id !== removed.mapId);
+          p.keys = p.keys.filter((k) => k.mapId !== removed.mapId);
+        }
         return p;
       });
       setSelected(null);

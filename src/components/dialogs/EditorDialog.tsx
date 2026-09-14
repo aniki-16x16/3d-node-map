@@ -3,6 +3,7 @@ import type { EditorController } from "../../hooks/useEditorController";
 import Button from "../ui/Button";
 import HelpContent from "./HelpContent";
 import PreviewDebug from "./PreviewDebug";
+import KeyManager from "./KeyManager";
 import ProjectSettings from "./ProjectSettings";
 import ValidationResults from "./ValidationResults";
 type Props = Pick<
@@ -49,7 +50,9 @@ export default function EditorDialog({
               ? "地图校验"
               : modal === "debug"
                 ? "预览调试"
-                : "项目设置"
+                : modal === "keys"
+                  ? "钥匙管理"
+                  : "项目设置"
         }
         onClick={(e) => e.stopPropagation()}
       >
@@ -61,13 +64,17 @@ export default function EditorDialog({
                 ? "地图校验"
                 : modal === "debug"
                   ? "预览调试"
-                  : "项目设置"}
+                  : modal === "keys"
+                    ? "钥匙管理"
+                    : "项目设置"}
           </h2>
           <Button title="关闭" onClick={() => setModal(null)}>
             <X size={19} />
           </Button>
         </div>
-        {modal === "settings" ? (
+        {modal === "keys" ? (
+          <KeyManager {...{ project, map, readonly, commit }} />
+        ) : modal === "settings" ? (
           <ProjectSettings
             {...{
               project,

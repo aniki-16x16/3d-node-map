@@ -94,7 +94,10 @@ function project(v: unknown): v is Project {
     Array.isArray(v.keys) &&
     v.keys.every(
       (k) =>
-        record(k) && typeof k.id === "string" && typeof k.name === "string",
+        record(k) &&
+        typeof k.id === "string" &&
+        typeof k.name === "string" &&
+        (k.mapId === null || typeof k.mapId === "string"),
     ) &&
     Array.isArray(v.maps) &&
     v.maps.every(map) &&
@@ -112,5 +115,33 @@ export function parseProject(text: string): Project {
     ...value.maps.flatMap((m) => m.nodes.map((n) => n.id)),
   ];
   if (new Set(ids).size !== ids.length) throw new Error("地图或节点 ID 重复");
+  if (new Set(value.keys.map((k) => k.id)).size !== value.keys.length)
+    throw new Error("钥匙 ID 重复");
+  for (const k of value.keys)
+    if (
+      k.mapId !== null &&
+      !value.maps.some((m) => m.id === k.mapId && m.kind === "area")
+    )
+      throw new Error("局部钥匙必须属于有效的二级地图");
+  for (const m of value.maps) {
+    const foreign = new Set(
+      value.keys
+        .filter((k) => k.mapId !== null && k.mapId !== m.id)
+        .map((k) => k.id),
+    );
+    const check = (c: ConditionGroup): boolean =>
+      c.rules.every((r) =>
+        r.rules ? check(r) : r.type !== "key" || !foreign.has(r.ref),
+      );
+    if (
+      m.nodes.some(
+        (n) =>
+          !check(n.show) ||
+          !check(n.enter) ||
+          n.rewards.some((id) => foreign.has(id)),
+      )
+    )
+      throw new Error("节点不能引用其他二级地图的局部钥匙");
+  }
   return value;
 }

@@ -8,7 +8,7 @@ import {
   LockKeyhole,
   Trash2,
 } from "lucide-react";
-import { TYPES } from "../../domain";
+import { TYPES, availableKeys } from "../../domain";
 import type { EditorController } from "../../hooks/useEditorController";
 import Button from "../ui/Button";
 import ConditionEditor from "./ConditionEditor";
@@ -177,7 +177,7 @@ export default function NodeSettings({
               <KeyRound size={14} />
               完成奖励
             </label>
-            {project.keys.map((k) => (
+            {availableKeys(project, map.id).map((k) => (
               <label key={k.id} className="check-label">
                 <input
                   type="checkbox"
@@ -190,13 +190,13 @@ export default function NodeSettings({
                     })
                   }
                 />
-                {k.name}
+                {k.name} · {k.mapId === null ? "全局" : "局部"}
               </label>
             ))}
             <Button
               className="text-button"
               title="管理钥匙"
-              onClick={() => setModal("settings")}
+              onClick={() => setModal("keys")}
             >
               管理钥匙 <ArrowUpRight size={13} />
             </Button>
@@ -211,6 +211,7 @@ export default function NodeSettings({
           <ConditionEditor
             value={node.show}
             project={project}
+            mapId={map.id}
             onChange={(show) => updateNode({ show })}
           />
         </div>
@@ -223,6 +224,7 @@ export default function NodeSettings({
           <ConditionEditor
             value={node.enter}
             project={project}
+            mapId={map.id}
             onChange={(enter) => updateNode({ enter })}
           />
         </div>

@@ -60,19 +60,32 @@ export function duplicateNode(
     if (original) {
       const area = structuredClone(original),
         ids = new Map(area.nodes.map((n) => [n.id, uid()]));
+      const keyIds = new Map(
+        project.keys
+          .filter((k) => k.mapId === original.id)
+          .map((k) => [k.id, uid()]),
+      );
       const remap = (c: ConditionGroup) =>
         c.rules.forEach((r) =>
           r.rules
             ? remap(r)
-            : r.type === "visited" &&
-              ids.has(r.ref) &&
-              (r.ref = ids.get(r.ref)!),
+            : r.type === "key"
+              ? keyIds.has(r.ref) && (r.ref = keyIds.get(r.ref)!)
+              : r.type === "visited" &&
+                ids.has(r.ref) &&
+                (r.ref = ids.get(r.ref)!),
         );
       area.id = uid();
       area.name = copy.name;
+      project.keys.push(
+        ...project.keys
+          .filter((k) => k.mapId === original.id)
+          .map((k) => ({ ...k, id: keyIds.get(k.id)!, mapId: area.id })),
+      );
       area.defaultEntry = ids.get(area.defaultEntry || "");
       area.nodes.forEach((n) => {
         n.id = ids.get(n.id)!;
+        n.rewards = n.rewards.map((id) => keyIds.get(id) ?? id);
         remap(n.show);
         remap(n.enter);
         if (n.target === source.id) {
@@ -90,7 +103,23 @@ export function duplicateNode(
       copy.mapId = area.id;
     }
   }
+  const allowed = new Set(availableKeys(project, mapId).map((k) => k.id));
+  const clean = (group: ConditionGroup) => {
+    group.rules = group.rules.filter(
+      (r) =>
+        r.rules ||
+        r.type !== "key" ||
+        !project.keys.some((k) => k.id === r.ref) ||
+        allowed.has(r.ref),
+    );
+    for (const r of group.rules) if (r.rules) clean(r);
+  };
+  copy.rewards = copy.rewards.filter((id) => allowed.has(id));
+  clean(copy.show);
+  clean(copy.enter);
   project.maps.find((m) => m.id === mapId)!.nodes.push(copy);
   return copy;
 }
+export const availableKeys = (p: Project, mapId: string) =>
+  p.keys.filter((k) => k.mapId === null || k.mapId === mapId);
 export const allNodes = (p: Project) => p.maps.flatMap((m) => m.nodes);

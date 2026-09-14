@@ -40,8 +40,8 @@ export function demoProject(): Project {
     version: 1,
     name: "远境 · 探索之路",
     keys: [
-      { id: "copper", name: "铜钥匙" },
-      { id: "moon", name: "月之碎片" },
+      { mapId: null, id: "copper", name: "铜钥匙" },
+      { mapId: null, id: "moon", name: "月之碎片" },
     ],
     maps: [
       {

@@ -59,6 +59,7 @@ export interface AtlasMap {
   defaultEntry?: string;
 }
 export interface KeyResource {
+  mapId: string | null;
   id: string;
   name: string;
 }

@@ -1,6 +1,5 @@
-import { KeyRound, Plus, Trash2 } from "lucide-react";
-import { useState } from "react";
-import { allNodes, blankProgress, blankProject, uid } from "../../domain";
+import { Plus } from "lucide-react";
+import { blankProgress, blankProject } from "../../domain";
 import type { EditorController } from "../../hooks/useEditorController";
 import Button from "../ui/Button";
 type Props = Pick<
@@ -28,7 +27,6 @@ export default function ProjectSettings({
   loadDemo,
   restoreSavedProject,
 }: Props) {
-  const [keyName, setKeyName] = useState("");
   return (
     <>
       <Button
@@ -86,62 +84,6 @@ export default function ProjectSettings({
           />
         </>
       )}
-      <h3>钥匙资源</h3>
-      {project.keys.map((k) => (
-        <div className="key-resource" key={k.id}>
-          <KeyRound size={16} />
-          <input
-            aria-label="钥匙名称"
-            disabled={readonly}
-            value={k.name}
-            onChange={(e) =>
-              commit((p) => {
-                p.keys.find((x) => x.id === k.id)!.name = e.target.value;
-                return p;
-              })
-            }
-          />
-          <Button
-            disabled={readonly}
-            title="删除钥匙"
-            onClick={() =>
-              commit((p) => {
-                p.keys = p.keys.filter((x) => x.id !== k.id);
-                for (const n of allNodes(p))
-                  n.rewards = n.rewards.filter((id) => id !== k.id);
-                return p;
-              })
-            }
-          >
-            <Trash2 size={15} />
-          </Button>
-        </div>
-      ))}
-      <div className="field-row">
-        <input
-          disabled={readonly}
-          placeholder="新钥匙名称"
-          value={keyName}
-          onChange={(e) => setKeyName(e.target.value)}
-        />
-        <Button
-          disabled={readonly || !keyName.trim()}
-          title="添加钥匙"
-          onClick={() => {
-            commit((p) => ({
-              ...p,
-              keys: [...p.keys, { id: uid(), name: keyName.trim() }],
-            }));
-            setKeyName("");
-          }}
-        >
-          <Plus size={16} />
-          添加
-        </Button>
-      </div>
-      <p className="muted small">
-        删除被条件引用的资源后，可通过地图校验定位需要修复的条件。
-      </p>
     </>
   );
 }

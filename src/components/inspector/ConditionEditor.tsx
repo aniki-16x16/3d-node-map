@@ -1,6 +1,6 @@
 import Select from "../ui/Select";
 import { Plus, X } from "lucide-react";
-import { emptyCondition } from "../../domain";
+import { emptyCondition, availableKeys } from "../../domain";
 import type {
   Condition,
   ConditionGroup,
@@ -13,10 +13,12 @@ export default function ConditionEditor({
   onChange,
   project,
   depth = 0,
+  mapId,
 }: {
   value: ConditionGroup;
   onChange: (value: ConditionGroup) => void;
   project: Project;
+  mapId: string;
   depth?: number;
 }) {
   const update = (i: number, r: Condition) =>
@@ -41,7 +43,11 @@ export default function ConditionEditor({
               ...value,
               rules: [
                 ...value.rules,
-                { type: "key", ref: project.keys[0]?.id || "", not: false },
+                {
+                  type: "key",
+                  ref: availableKeys(project, mapId)[0]?.id || "",
+                  not: false,
+                },
               ],
             })
           }
@@ -66,6 +72,7 @@ export default function ConditionEditor({
             <ConditionEditor
               value={r}
               project={project}
+              mapId={mapId}
               depth={depth + 1}
               onChange={(x) => update(i, x)}
             />
@@ -102,9 +109,9 @@ export default function ConditionEditor({
               >
                 <option value="">选择目标…</option>
                 {r.type === "key"
-                  ? project.keys.map((k) => (
+                  ? availableKeys(project, mapId).map((k) => (
                       <option key={k.id} value={k.id}>
-                        {k.name}
+                        {k.name} · {k.mapId === null ? "全局" : "局部"}
                       </option>
                     ))
                   : project.maps.map((m) => (

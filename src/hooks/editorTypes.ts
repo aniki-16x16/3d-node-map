@@ -1,7 +1,8 @@
 import type { Dispatch, SetStateAction } from "react";
 import type { Port, Project } from "../domain/types";
 export type Setter<T> = Dispatch<SetStateAction<T>>;
-export type Modal = "settings" | "help" | "validation" | "debug" | null;
+export type Modal =
+  "keys" | "settings" | "help" | "validation" | "debug" | null;
 export type EditorTool = "select" | "hand";
 export interface PendingConnection {
   id: string;
