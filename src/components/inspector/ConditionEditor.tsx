@@ -1,3 +1,4 @@
+import Select from "../ui/Select";
 import { Plus, X } from "lucide-react";
 import { emptyCondition } from "../../domain";
 import type {
@@ -23,7 +24,7 @@ export default function ConditionEditor({
   return (
     <div className="condition">
       <div className="condition-head">
-        <select
+        <Select
           aria-label="条件组合"
           value={value.op}
           onChange={(e) =>
@@ -32,7 +33,7 @@ export default function ConditionEditor({
         >
           <option value="all">满足全部条件 · AND</option>
           <option value="any">满足任一条件 · OR</option>
-        </select>
+        </Select>
         <Button
           title="添加条件"
           onClick={() =>
@@ -70,7 +71,7 @@ export default function ConditionEditor({
             />
           ) : (
             <div className="rule-fields">
-              <select
+              <Select
                 aria-label="条件类型"
                 value={r.type}
                 onChange={(e) =>
@@ -83,8 +84,8 @@ export default function ConditionEditor({
               >
                 <option value="key">钥匙</option>
                 <option value="visited">已到达节点</option>
-              </select>
-              <select
+              </Select>
+              <Select
                 aria-label="条件判断"
                 value={String(r.not)}
                 onChange={(e) =>
@@ -93,8 +94,8 @@ export default function ConditionEditor({
               >
                 <option value="false">有 / 是</option>
                 <option value="true">无 / 否</option>
-              </select>
-              <select
+              </Select>
+              <Select
                 aria-label="条件目标"
                 value={r.ref}
                 onChange={(e) => update(i, { ...r, ref: e.target.value })}
@@ -115,7 +116,7 @@ export default function ConditionEditor({
                         ))}
                       </optgroup>
                     ))}
-              </select>
+              </Select>
             </div>
           )}
           <Button

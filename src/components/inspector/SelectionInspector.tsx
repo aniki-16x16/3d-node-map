@@ -1,3 +1,4 @@
+import Select from "../ui/Select";
 import { Check, MapPin, Settings2, Trash2, X } from "lucide-react";
 import React from "react";
 import { TYPES } from "../../domain";
@@ -147,7 +148,8 @@ export default function SelectionInspector({
             ) : (
               <>
                 <label>通行方向</label>
-                <select
+                <Select
+                  aria-label="通行方向"
                   disabled={readonly}
                   value={String(edge.directed)}
                   onChange={(e) =>
@@ -160,7 +162,7 @@ export default function SelectionInspector({
                 >
                   <option value="false">双向通行</option>
                   <option value="true">单向：起点 → 终点</option>
-                </select>
+                </Select>
                 <Button
                   disabled={readonly}
                   className="danger wide"

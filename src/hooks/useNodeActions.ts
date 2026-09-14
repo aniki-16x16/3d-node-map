@@ -1,4 +1,4 @@
-import type { RefObject } from "react";
+import { useState, type RefObject } from "react";
 import { snapCoordinate } from "../domain/layout";
 import { duplicateNode, newNode, uid } from "../domain/project";
 import type {
@@ -48,6 +48,7 @@ export function useNodeActions({
   setPending,
   notify,
 }: Options) {
+  const [creationCount, setCreationCount] = useState(0);
   const updateMap = (fn: (map: AtlasMap) => void) =>
     commit((p) => {
       fn(p.maps.find((m) => m.id === map.id)!);
@@ -95,7 +96,10 @@ export function useNodeActions({
       copied = duplicateNode(p, map.id, node, node.x + 80, node.y + 80, node.z);
       return p;
     });
-    if (copied) setSelected(copied.id);
+    if (copied) {
+      setSelected(copied.id);
+      setCreationCount((count) => count + 1);
+    }
   };
   const addNode = (type: NodeType, position?: Point) => {
     if (readonly) return;
@@ -127,6 +131,7 @@ export function useNodeActions({
       if (type === "entrance" && !m.defaultEntry) m.defaultEntry = n.id;
       return p;
     });
+    setCreationCount((count) => count + 1);
     setSelected(n.id);
     setSelectedEdge(null);
   };
@@ -167,6 +172,7 @@ export function useNodeActions({
     setPending(null);
   };
   return {
+    creationCount,
     updateMap,
     updateNode,
     deleteSelection,

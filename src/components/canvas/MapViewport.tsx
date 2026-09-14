@@ -1,4 +1,4 @@
-import { Box, Layers3, Link2, MousePointer2, X } from "lucide-react";
+import { Layers3, Link2, X } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import type { EditorController } from "../../hooks/useEditorController";
 import Button from "../ui/Button";
@@ -31,7 +31,6 @@ type Props = { children?: ReactNode; captionActions?: ReactNode } & Pick<
   | "readonly"
   | "activeProgress"
   | "visibleNodes"
-  | "layers"
   | "undo"
   | "redo"
   | "fit"
@@ -65,7 +64,6 @@ export default function MapViewport({
   readonly,
   activeProgress,
   visibleNodes,
-  layers,
   undo,
   redo,
   fit,
@@ -160,27 +158,12 @@ export default function MapViewport({
       )}
       {map.kind === "area" && !three && (
         <LayerControl
-          {...{ layer, setLayer, layers, referenceLayer, setReferenceLayer }}
+          {...{ layer, setLayer, referenceLayer, setReferenceLayer }}
+          layers={[...new Set(visibleNodes.map((node) => node.z))].sort(
+            (a, b) => b - a,
+          )}
         />
       )}
-      <div className="bottom-hint">
-        {three ? (
-          <>
-            <Box size={14} />
-            拖动旋转 · 滚轮缩放 · 右键平移
-            {playing ? " · 点击节点探索" : ""}
-          </>
-        ) : (
-          <>
-            <MousePointer2 size={14} />
-            {playing
-              ? "点击开放节点探索，已完成节点可随时返回"
-              : map.kind === "world"
-                ? "右键创建 · 数字键 1–2 · 空白处拖拽平移 · 滚轮缩放"
-                : "右键创建 · 数字键 1–7 · PgUp / PgDn 换层 · Alt + 滚轮换层"}
-          </>
-        )}
-      </div>
       {!three && <ZoomControl {...{ view, fit, zoom }} />}
       {!visibleNodes.filter((n) => three || n.z === layer).length && (
         <div className="empty-canvas">

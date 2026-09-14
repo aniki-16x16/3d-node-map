@@ -1,3 +1,4 @@
+import Select from "../ui/Select";
 import {
   ArrowUpRight,
   Copy,
@@ -121,7 +122,8 @@ export default function NodeSettings({
         {node.type === "exit" && (
           <div className="drawer-section">
             <label>出口目标 · 世界节点</label>
-            <select
+            <Select
+              aria-label="出口目标"
               value={node.target || ""}
               onChange={(e) =>
                 updateNode({
@@ -136,12 +138,13 @@ export default function NodeSettings({
                   {n.name} · {TYPES[n.type]}
                 </option>
               ))}
-            </select>
+            </Select>
             {world.nodes.find((n) => n.id === node.target)?.type ===
               "region" && (
               <>
                 <label>目标入口</label>
-                <select
+                <Select
+                  aria-label="目标入口"
                   value={node.targetEntry || ""}
                   onChange={(e) =>
                     updateNode({
@@ -162,7 +165,7 @@ export default function NodeSettings({
                         {n.name}
                       </option>
                     ))}
-                </select>
+                </Select>
               </>
             )}
             <p className="muted small">对应世界路线自动生成。</p>

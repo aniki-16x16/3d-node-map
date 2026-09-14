@@ -1,9 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { Copy, Trash2, X } from "lucide-react";
-import { TYPES } from "../../domain";
 import type { NodeType, Point } from "../../domain/types";
 import type { EditorController } from "../../hooks/useEditorController";
-import { ICONS, colors } from "../nodeAppearance";
+import NodeToolCard from "./NodeToolCard";
 
 type Props = Pick<
   EditorController,
@@ -23,6 +22,7 @@ type Props = Pick<
   | "deleteSelection"
   | "updateNode"
   | "notify"
+  | "creationCount"
 >;
 type Menu = { x: number; y: number; position: Point; nodeId?: string };
 export default function CanvasActions({
@@ -42,7 +42,14 @@ export default function CanvasActions({
   deleteSelection,
   updateNode,
   notify,
+  creationCount,
 }: Props) {
+  const [idle, setIdle] = useState(false);
+  useEffect(() => {
+    setIdle(false);
+    const timer = window.setTimeout(() => setIdle(true), 2000);
+    return () => window.clearTimeout(timer);
+  }, [creationCount]);
   const [menu, setMenu] = useState<Menu | null>(null);
   const [targetLayer, setTargetLayer] = useState(String(layer));
   useEffect(() => {
@@ -135,6 +142,13 @@ export default function CanvasActions({
       if (!menuRef.current?.contains(e.target as Node)) setMenu(null);
     };
     const key = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      if (
+        target.closest(".select-menu") ||
+        (target.closest(".select-trigger") &&
+          !target.closest(".floor-controls"))
+      )
+        return;
       if (e.key === "Alt" && pointer.current && !three && !modal) {
         e.preventDefault();
       }
@@ -215,99 +229,116 @@ export default function CanvasActions({
       window.removeEventListener("keyup", keyUp, true);
     };
   });
-  if (!menu || readonly || modal) return null;
+  if (readonly || modal) return null;
   return (
-    <div
-      ref={menuRef}
-      className={`canvas-ui canvas-context ${menu.nodeId ? "node-context" : "node-wheel"}`}
-      style={{ left: menu.x, top: menu.y }}
-      onPointerDown={(e) => e.stopPropagation()}
-      onContextMenu={(e) => e.preventDefault()}
-      onWheel={(e) => e.stopPropagation()}
-      aria-label={menu.nodeId ? "节点操作" : "创建节点"}
-    >
-      {menu.nodeId ? (
-        <>
-          <div className="context-heading">
-            {node?.name}
-            <button aria-label="关闭节点菜单" onClick={() => setMenu(null)}>
-              <X size={14} />
-            </button>
-          </div>
-          <button
+    <>
+      <div
+        className={`node-tools canvas-ui ${idle ? "idle" : ""}`}
+        role="toolbar"
+        aria-label="创建节点工具栏"
+        onPointerDown={(e) => e.stopPropagation()}
+        onContextMenu={(e) => e.preventDefault()}
+      >
+        {types.map((type, i) => (
+          <NodeToolCard
+            key={type}
+            type={type}
+            number={i + 1}
             onClick={() => {
-              duplicate();
+              addNode(type);
               setMenu(null);
             }}
-          >
-            <Copy size={15} />
-            复制节点
-          </button>
-          {map.kind === "area" && (
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                if (targetLayer.trim()) moveNode(Number(targetLayer));
-              }}
-            >
-              <label htmlFor="move-node-layer">移动到楼层</label>
-              <div>
-                <span>Z</span>
-                <input
-                  id="move-node-layer"
-                  type="number"
-                  step="1"
-                  required
-                  value={targetLayer}
-                  onChange={(e) => setTargetLayer(e.target.value)}
-                />
-                <button type="submit">移动</button>
+          />
+        ))}
+      </div>
+      {menu && (
+        <div
+          ref={menuRef}
+          className={`canvas-ui canvas-context ${menu.nodeId ? "node-context" : "node-wheel"}`}
+          style={{ left: menu.x, top: menu.y }}
+          onPointerDown={(e) => e.stopPropagation()}
+          onContextMenu={(e) => e.preventDefault()}
+          onWheel={(e) => e.stopPropagation()}
+          aria-label={menu.nodeId ? "节点操作" : "创建节点"}
+        >
+          {menu.nodeId ? (
+            <>
+              <div className="context-heading">
+                {node?.name}
+                <button aria-label="关闭节点菜单" onClick={() => setMenu(null)}>
+                  <X size={14} />
+                </button>
               </div>
-              <small>Shift + PageUp / PageDown 快速移层</small>
-            </form>
-          )}
-          <button
-            className="danger"
-            onClick={() => {
-              deleteSelection();
-              setMenu(null);
-            }}
-          >
-            <Trash2 size={15} />
-            删除节点
-          </button>
-        </>
-      ) : (
-        <>
-          <div className="wheel-center">
-            <strong>创建节点</strong>
-            <small>数字键快速创建</small>
-            <button onClick={() => setMenu(null)} aria-label="关闭创建轮盘">
-              <X size={16} />
-            </button>
-          </div>
-          {types.map((type, i) => {
-            const angle = (i / types.length) * Math.PI * 2 - Math.PI / 2;
-            const Icon = ICONS[type];
-            return (
               <button
-                key={type}
-                className="wheel-item"
-                style={{
-                  left: 165 + Math.cos(angle) * 112,
-                  top: 165 + Math.sin(angle) * 112,
+                onClick={() => {
+                  duplicate();
+                  setMenu(null);
                 }}
-                onClick={() => create(type)}
-                title={`${i + 1} · ${TYPES[type]}`}
               >
-                <Icon size={21} color={colors[type]} />
-                <span>{TYPES[type]}</span>
-                <kbd>{i + 1}</kbd>
+                <Copy size={15} />
+                复制节点
               </button>
-            );
-          })}
-        </>
+              {map.kind === "area" && (
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    if (targetLayer.trim()) moveNode(Number(targetLayer));
+                  }}
+                >
+                  <label htmlFor="move-node-layer">移动到楼层</label>
+                  <div>
+                    <span>Z</span>
+                    <input
+                      id="move-node-layer"
+                      type="number"
+                      step="1"
+                      required
+                      value={targetLayer}
+                      onChange={(e) => setTargetLayer(e.target.value)}
+                    />
+                    <button type="submit">移动</button>
+                  </div>
+                  <small>Shift + PageUp / PageDown 快速移层</small>
+                </form>
+              )}
+              <button
+                className="danger"
+                onClick={() => {
+                  deleteSelection();
+                  setMenu(null);
+                }}
+              >
+                <Trash2 size={15} />
+                删除节点
+              </button>
+            </>
+          ) : (
+            <>
+              <div className="wheel-center">
+                <button onClick={() => setMenu(null)} aria-label="关闭创建轮盘">
+                  <X size={16} />
+                </button>
+              </div>
+              {types.map((type, i) => {
+                const angle = (i / types.length) * Math.PI * 2 - Math.PI / 2;
+                return (
+                  <NodeToolCard
+                    key={type}
+                    type={type}
+                    number={i + 1}
+                    className="wheel-item"
+                    style={{
+                      left: 165 + Math.cos(angle) * 112,
+                      top: 165 + Math.sin(angle) * 112,
+                    }}
+                    onClick={() => create(type)}
+                  />
+                );
+              })}
+            </>
+          )}
+        </div>
       )}
-    </div>
+    </>
   );
 }
