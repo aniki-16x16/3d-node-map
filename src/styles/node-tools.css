@@ -1,0 +1,127 @@
+/* node-tools styles */
+
+.node-wheel {
+  width: 330px;
+  height: 330px;
+  border-radius: 50%;
+  background: #16242df5;
+}
+
+.wheel-center {
+  position: absolute;
+  inset: 118px 100px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+}
+
+.wheel-center button {
+  color: #91a6b2;
+  padding: 4px;
+}
+
+.wheel-item {
+  position: absolute;
+  transform: translate(-50%, -50%);
+}
+
+.node-tools {
+  position: absolute;
+  bottom: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 9px;
+  z-index: 7;
+  padding: 8px;
+  border-radius: 12px;
+  background: #15232bd9;
+  border: 1px solid #334651;
+  opacity: 1;
+  transition: opacity 0.25s ease;
+}
+
+.node-tools.idle {
+  opacity: 0.4;
+}
+
+.node-tools:hover {
+  opacity: 1;
+}
+
+.node-tool-card {
+  position: relative;
+  flex-shrink: 0;
+  width: 76px;
+  height: 76px;
+  border: 1px solid #405764;
+  border-radius: 9px;
+  background: #20323e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 11px;
+  isolation: isolate;
+  overflow: hidden;
+  padding: 8px 4px;
+}
+
+.node-tool-card:hover,
+.node-tool-card:focus-visible {
+  background: #365445;
+  border-color: #a2dcc4;
+}
+
+.node-tool-card.wheel-item {
+  position: absolute;
+}
+
+.node-tool-card>svg,
+.node-tool-card>span {
+  position: relative;
+  z-index: 1;
+}
+
+.node-tool-card kbd {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  color: #101c25;
+  font-size: 64px;
+  font-weight: 900;
+  line-height: 1;
+  z-index: 0;
+  pointer-events: none;
+  inset: 0;
+  letter-spacing: 0;
+  text-align: center;
+}
+
+.node-tools .node-tool-card {
+  width: 68px;
+  height: 68px;
+}
+
+@media (max-width: 1150px) {
+  .node-tools {
+    gap: 5px;
+  }
+
+  .node-tools .node-tool-card {
+    width: 60px;
+    height: 60px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .node-tools {
+    transition: none;
+  }
+}

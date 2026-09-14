@@ -1,0 +1,103 @@
+/* menus styles */
+
+.map-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.map-actions {
+  position: relative;
+  pointer-events: auto;
+}
+.map-actions-toggle {
+  padding: 5px;
+  color: #96abb7;
+  border-radius: 6px;
+}
+.map-actions-toggle:hover {
+  background: #263943;
+  color: #d6eee3;
+}
+.map-actions-menu,
+.canvas-context {
+  background: #18252f;
+  border: 1px solid #435763;
+  box-shadow: 0 12px 38px #0007;
+  border-radius: 12px;
+  color: #d4dfe4;
+}
+.map-actions-menu {
+  position: absolute;
+  left: 0;
+  top: 34px;
+  width: 225px;
+  padding: 7px;
+}
+.canvas-context {
+  position: fixed;
+  z-index: 30;
+}
+.node-context {
+  width: 240px;
+  padding: 10px;
+}
+.context-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 5px 10px;
+  overflow-wrap: anywhere;
+}
+.map-actions-menu button,
+.node-context > button {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px;
+  border-radius: 6px;
+  width: 100%;
+  text-align: left;
+}
+.map-actions-menu button:hover,
+.node-context > button:hover {
+  background: #2b3e49;
+}
+.canvas-ui .danger {
+  color: #f19a9e;
+}
+.canvas-ui small {
+  font-size: 10px;
+  color: #91a6b2;
+}
+.map-actions-menu small {
+  margin-left: auto;
+}
+.canvas-ui form {
+  padding: 8px;
+  display: grid;
+  gap: 9px;
+}
+.canvas-ui form label {
+  font-size: 12px;
+}
+.canvas-ui form > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.canvas-ui input {
+  min-width: 0;
+  width: 100%;
+  padding: 7px;
+  color: #d4dfe4;
+  background: #101b23;
+  border: 1px solid #435763;
+  border-radius: 5px;
+  user-select: text;
+}
+.canvas-ui form button {
+  white-space: nowrap;
+  padding: 7px;
+  background: #304e40;
+  border-radius: 5px;
+}

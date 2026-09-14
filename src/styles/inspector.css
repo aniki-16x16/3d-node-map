@@ -1,0 +1,182 @@
+/* inspector styles */
+
+.drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 14px;
+  border-bottom: 1px solid #303d48;
+  position: sticky;
+  top: 0;
+  background: #1a232c;
+  z-index: 1;
+}
+.drawer-header > span {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 12px;
+  color: #b4c3ce;
+}
+.node-heading {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 23px 20px;
+  border-bottom: 1px solid #303d48;
+}
+.node-heading > span {
+  display: flex;
+  padding: 10px;
+  background: #26313c;
+  border-radius: 9px;
+}
+.node-heading h3 {
+  font-size: 17px;
+  margin: 0 0 7px;
+}
+.node-heading small {
+  font-size: 10px;
+  color: #718795;
+}
+.drawer-section {
+  padding: 20px;
+  border-bottom: 1px solid #303d48;
+}
+.drawer-section > input,
+.drawer-section > .select-trigger {
+  width: 100%;
+  margin-bottom: 12px;
+}
+.drawer-section p {
+  line-height: 1.7;
+}
+.drawer-section h3 {
+  font-size: 15px;
+}
+.field-row {
+  display: flex;
+  gap: 10px;
+  margin: 10px 0;
+}
+.field-row > div {
+  flex: 1;
+  min-width: 0;
+}
+.field-row > input {
+  flex: 1;
+  width: 100%;
+}
+.static-field {
+  padding: 10px;
+  border-radius: 5px;
+  background: #222e38;
+  color: #91a1ac;
+  font-size: 12px;
+}
+.check-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 0;
+  font-size: 12px;
+  cursor: pointer;
+}
+.linked-map {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  background: #24332f;
+  padding: 7px 10px;
+  border-radius: 6px;
+  color: #a6cbbb;
+}
+.linked-map span {
+  flex: 1;
+}
+.condition {
+  background: #141d26;
+  border: 1px solid #303f4b;
+  border-radius: 5px;
+  padding: 7px;
+}
+.condition-head {
+  display: flex;
+  gap: 1px;
+  align-items: center;
+}
+.condition-head .select-trigger {
+  flex: 1;
+  border: 0;
+  background: transparent;
+  font-size: 10px;
+  padding: 5px;
+}
+.condition-head button {
+  padding: 5px;
+}
+.condition .muted {
+  margin: 8px 5px 4px;
+}
+.rule {
+  display: flex;
+  align-items: flex-start;
+  gap: 3px;
+  border-top: 1px solid #2a3945;
+  margin-top: 7px;
+  padding-top: 7px;
+}
+.rule > .condition {
+  flex: 1;
+  min-width: 0;
+}
+.rule > button {
+  padding: 4px;
+}
+.rule-fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+.rule-fields .select-trigger {
+  font-size: 10px;
+  padding: 6px 2px;
+  flex: 1;
+}
+.rule-fields .select-trigger:last-child {
+  flex-basis: 100%;
+  width: 100%;
+}
+.drawer-footer {
+  display: flex;
+  justify-content: space-between;
+  padding: 15px;
+}
+
+.drawer {
+  position: absolute;
+  z-index: 5;
+  right: 14px;
+  top: 14px;
+  width: 310px;
+  border: 1px solid #3a4854;
+  border-radius: 9px;
+  background: #1a232c;
+  box-shadow: -12px 15px 50px #0005;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  bottom: 120px;
+}
+@media (max-width: 1050px) {
+  .drawer {
+    width: 285px;
+  }
+}
+@media (max-width: 760px) {
+  .drawer {
+    width: min(285px, calc(100% - 18px));
+    right: 9px;
+  }
+}

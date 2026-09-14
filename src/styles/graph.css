@@ -1,0 +1,124 @@
+/* graph styles */
+
+.map-node,
+.edge-hit,
+.cross-layer {
+  pointer-events: auto;
+}
+.map-node {
+  cursor: grab;
+  color: var(--node-color);
+}
+.map-node:focus {
+  outline: none;
+}
+.map-node .diamond {
+  fill: #1b252d;
+  stroke: var(--node-color);
+  stroke-width: 1.8;
+  transition: fill 0.15s;
+}
+.map-node:hover .diamond {
+  fill: #2b3b42;
+  stroke-width: 2.5;
+}
+.map-node:focus-visible .diamond,
+.map-node.selected .diamond {
+  fill: #30483f;
+  stroke: var(--node-color);
+  stroke-width: 2;
+}
+.map-node .node-name {
+  fill: #c7d1d8;
+  font-size: 12px;
+  pointer-events: none;
+}
+.map-node.locked {
+  color: #75838d;
+}
+.map-node.locked .diamond {
+  fill: #202630;
+  stroke: #56636d;
+  stroke-dasharray: 4 3;
+}
+.map-node.done .diamond {
+  fill: #274238;
+}
+.port {
+  opacity: 0;
+  fill: #131f26;
+  stroke: #c0ebd7;
+  stroke-width: 2;
+  cursor: crosshair;
+}
+.map-node:hover .port,
+.map-node:focus-visible .port {
+  opacity: 1;
+}
+.port:hover,
+.port.pending {
+  fill: #c0ebd7;
+  r: 8;
+}
+.edge {
+  fill: none;
+  stroke: #4e636e;
+  stroke-width: 1.8;
+  stroke-linejoin: round;
+  pointer-events: stroke;
+}
+.edge.generated {
+  stroke-dasharray: 6 5;
+  stroke: #897ea5;
+}
+.edge-hit {
+  fill: none;
+  stroke: transparent;
+  stroke-width: 15;
+  cursor: pointer;
+}
+.edge.cross {
+  stroke-dasharray: 5 5;
+  stroke: #789aac;
+}
+.edge.selected {
+  stroke: #c1ebd5;
+  stroke-width: 3;
+}
+.cross-layer rect {
+  fill: #1c2b36;
+  stroke: #425e6f;
+  cursor: pointer;
+}
+.cross-layer text {
+  fill: #9fbfce;
+  font-size: 10px;
+  cursor: pointer;
+}
+.hand-tool,
+.hand-tool .map-node {
+  cursor: grab;
+}
+.dragging,
+.dragging .map-node {
+  cursor: grabbing;
+}
+.reference-layer {
+  opacity: 0.32;
+}
+.reference-layer,
+.reference-layer * {
+  pointer-events: none !important;
+}
+
+.map-node .structure-shape {
+  fill: #c9d1d8;
+  stroke: #edf2f5;
+}
+.map-node:hover .structure-shape {
+  fill: #eef2f5;
+}
+.map-node.selected .structure-shape {
+  fill: #f4f7f9;
+  stroke: #fff;
+}

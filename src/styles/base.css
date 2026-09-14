@@ -1,0 +1,150 @@
+/* base styles */
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap");
+:root {
+  font-family: "DM Sans", "Microsoft YaHei", sans-serif;
+  color: #d4dce1;
+  background: #10151b;
+  font-synthesis: none;
+  font-size: 13px;
+  color-scheme: dark;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+}
+button,
+input,
+select {
+  font: inherit;
+}
+button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: #a4afb9;
+  border-radius: 6px;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    color 0.15s;
+  padding: 8px 10px;
+  white-space: nowrap;
+}
+button:hover:not(:disabled) {
+  background: #252f39;
+  color: #f0f5f5;
+}
+button:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 2px solid #a2dcc4;
+  outline-offset: 2px;
+}
+input,
+select {
+  min-width: 0;
+  max-width: 100%;
+  border: 1px solid #323c47;
+  background: #171e26;
+  color: #d6e0e4;
+  border-radius: 5px;
+  padding: 9px 10px;
+  outline: none;
+}
+input[type="checkbox"] {
+  accent-color: #a8dfc5;
+  width: 14px;
+  height: 14px;
+}
+input[type="number"] {
+  width: 100%;
+}
+input:disabled,
+select:disabled {
+  opacity: 0.5;
+}
+label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #aebbc5;
+  font-size: 12px;
+  margin: 0 0 9px;
+}
+h1,
+h2,
+h3,
+p {
+  margin-top: 0;
+}
+h3 {
+  font-weight: 500;
+}
+fieldset {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+.primary {
+  background: #b5e5ce;
+  color: #172b24;
+  font-weight: 600;
+  padding: 10px 17px !important;
+}
+.primary:hover:not(:disabled) {
+  background: #cbf1df;
+  color: #14231d;
+}
+.stop-button {
+  background: #604a38;
+  color: #f4d4b8;
+}
+.eyebrow {
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: #75858d;
+  font-weight: 600;
+}
+.muted {
+  color: #748b99;
+  line-height: 1.7;
+}
+.small {
+  font-size: 10px;
+}
+.danger {
+  color: #d5a290;
+}
+.danger:hover:not(:disabled) {
+  background: #48302b;
+  color: #f4b3a2;
+}
+.text-button {
+  font-size: 10px;
+  color: #a3cbb9;
+  padding: 7px 0;
+}
+.wide {
+  width: 100%;
+  margin-top: 12px;
+  border: 1px solid #364650;
+  font-size: 11px;
+}
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-thumb {
+  background: #3a4b58;
+  border-radius: 8px;
+}

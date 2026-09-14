@@ -1,0 +1,130 @@
+/* select styles */
+
+.floor-controls {
+  position: absolute;
+  top: 25px;
+  right: 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  z-index: 6;
+}
+.select-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-width: 0;
+  border: 1px solid #354650;
+  border-radius: 6px;
+  background: #17232c;
+  color: #c5d4dc;
+  padding: 8px 10px;
+  font-size: 12px;
+  text-align: left;
+}
+.select-trigger > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.select-trigger > svg {
+  flex-shrink: 0;
+}
+.select-trigger:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.select-trigger:focus-visible {
+  outline: 2px solid #a2dcc4;
+  outline-offset: 2px;
+}
+.select-trigger.select-sm {
+  padding: 5px 8px;
+  font-size: 11px;
+}
+.select-trigger.select-lg {
+  padding: 12px 14px;
+  font-size: 16px;
+}
+.select-trigger.select-text {
+  padding: 0;
+  border: 0;
+  border-radius: 3px;
+  background: transparent;
+}
+.select-trigger.floor-current {
+  font-size: 44px;
+  font-weight: 600;
+  line-height: 1.15;
+  letter-spacing: -1px;
+  color: #d5e9df;
+}
+.select-trigger.floor-reference {
+  font-size: 16px;
+  line-height: 1.7;
+  color: #97accf;
+}
+.select-trigger.floor-reference.off {
+  color: #62737f;
+}
+.select-trigger.select-text:hover {
+  color: #d4f1e0;
+}
+.select-menu {
+  position: fixed;
+  z-index: 1000;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 6px;
+  background: #1a2933;
+  color: #d4dfe4;
+  border: 1px solid #455b67;
+  border-radius: 10px;
+  box-shadow: 0 12px 35px #0008;
+  outline: none;
+}
+.select-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 10px;
+  min-height: 36px;
+  border-radius: 5px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.select-option > span {
+  overflow-wrap: anywhere;
+}
+.select-option > svg {
+  flex-shrink: 0;
+}
+.select-option.active {
+  background: #304650;
+}
+.select-option[aria-selected="true"] {
+  color: #b8ecd1;
+}
+.select-option[aria-disabled="true"] {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.select-lg .select-option {
+  padding: 12px 14px;
+  min-height: 48px;
+  font-size: 17px;
+}
+.select-sm .select-option {
+  padding: 5px 8px;
+  min-height: 28px;
+  font-size: 11px;
+}
+.select-group,
+.select-empty {
+  padding: 8px 10px;
+  font-size: 11px;
+  color: #91a6b2;
+}
