@@ -1,10 +1,11 @@
 import Select from "../ui/Select";
-import { Check, MapPin, Settings2, Trash2, X } from "lucide-react";
+import { Check, MapPin, Settings2, Trash2 } from "lucide-react";
 import React from "react";
 import { TYPES } from "../../domain";
 import type { EditorController } from "../../hooks/useEditorController";
 import { ICONS, colors } from "../nodeAppearance";
 import Button from "../ui/Button";
+import Drawer from "../ui/Drawer";
 import NodeSettings from "./NodeSettings";
 type Props = Pick<
   EditorController,
@@ -50,22 +51,20 @@ export default function SelectionInspector({
   status,
 }: Props) {
   return (
-    <aside className="drawer" onPointerDown={(e) => e.stopPropagation()}>
-      <div className="drawer-header">
-        <span>
+    <Drawer
+      open={!!(node || edge)}
+      title={
+        <>
           <Settings2 size={16} />
           {readonly ? "节点详情" : "参数配置"}
-        </span>
-        <Button
-          title="关闭参数"
-          onClick={() => {
-            setSelected(null);
-            setSelectedEdge(null);
-          }}
-        >
-          <X size={17} />
-        </Button>
-      </div>
+        </>
+      }
+      closeLabel="关闭参数"
+      onClose={() => {
+        setSelected(null);
+        setSelectedEdge(null);
+      }}
+    >
       {node ? (
         <>
           <div className="node-heading">
@@ -177,6 +176,6 @@ export default function SelectionInspector({
           </div>
         )
       )}
-    </aside>
+    </Drawer>
   );
 }

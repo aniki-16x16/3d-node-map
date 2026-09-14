@@ -31,7 +31,7 @@ export default function App() {
               key={`${editor.map.id}-${editor.three}-${editor.playing}`}
               {...editor}
             />
-            {(editor.node || editor.edge) && <SelectionInspector {...editor} />}
+            <SelectionInspector {...editor} />
           </MapViewport>
           <StatusBar {...editor} />
         </main>

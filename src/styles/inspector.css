@@ -1,23 +1,5 @@
 /* inspector styles */
 
-.drawer-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 11px 14px;
-  border-bottom: 1px solid #303d48;
-  position: sticky;
-  top: 0;
-  background: #1a232c;
-  z-index: 1;
-}
-.drawer-header > span {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  font-size: 12px;
-  color: #b4c3ce;
-}
 .node-heading {
   display: flex;
   align-items: center;
@@ -153,30 +135,4 @@
   display: flex;
   justify-content: space-between;
   padding: 15px;
-}
-
-.drawer {
-  position: absolute;
-  z-index: 5;
-  right: 14px;
-  top: 14px;
-  width: 310px;
-  border: 1px solid #3a4854;
-  border-radius: 9px;
-  background: #1a232c;
-  box-shadow: -12px 15px 50px #0005;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  bottom: 120px;
-}
-@media (max-width: 1050px) {
-  .drawer {
-    width: 285px;
-  }
-}
-@media (max-width: 760px) {
-  .drawer {
-    width: min(285px, calc(100% - 18px));
-    right: 9px;
-  }
 }
