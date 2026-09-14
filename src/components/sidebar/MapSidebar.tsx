@@ -1,18 +1,10 @@
-import {
-  CheckCircle2,
-  ChevronRight,
-  CircleHelp,
-  Globe2,
-  Trash2,
-} from "lucide-react";
+import { CheckCircle2, ChevronRight, CircleHelp, Globe2 } from "lucide-react";
 import type { EditorController } from "../../hooks/useEditorController";
-import NodePalette from "./NodePalette";
 import PreviewPanel from "./PreviewPanel";
 type Props = Pick<
   EditorController,
   | "project"
   | "setLayer"
-  | "three"
   | "playing"
   | "setProgress"
   | "setModal"
@@ -21,14 +13,10 @@ type Props = Pick<
   | "activeProgress"
   | "notify"
   | "changeMap"
-  | "addNode"
-  | "deleteMap"
-  | "readonly"
 >;
 export default function MapSidebar({
   project,
   setLayer,
-  three,
   playing,
   setProgress,
   setModal,
@@ -37,9 +25,6 @@ export default function MapSidebar({
   activeProgress,
   notify,
   changeMap,
-  addNode,
-  deleteMap,
-  readonly,
 }: Props) {
   return (
     <aside className="sidebar">
@@ -100,26 +85,13 @@ export default function MapSidebar({
                   </span>
                   <ChevronRight size={14} />
                 </button>
-                {!readonly && (
-                  <button
-                    className="delete-map"
-                    title={`删除二级地图 ${m.name}（可撤销）`}
-                    aria-label={`删除二级地图 ${m.name}`}
-                    onClick={() => deleteMap(m.id)}
-                  >
-                    <Trash2 size={15} />
-                  </button>
-                )}
               </div>
             );
           })}
       </nav>
-      <div className="sidebar-section">
-        <div className="section-label">
-          {playing ? "探索状态" : "添加节点"}
-          {!playing && <span>点击创建</span>}
-        </div>
-        {playing ? (
+      {playing && (
+        <div className="sidebar-section">
+          <div className="section-label">探索状态</div>
           <PreviewPanel
             {...{
               project,
@@ -132,10 +104,8 @@ export default function MapSidebar({
               changeMap,
             }}
           />
-        ) : (
-          <NodePalette {...{ three, map, addNode }} />
-        )}
-      </div>
+        </div>
+      )}
       <div className="sidebar-bottom">
         <button onClick={() => setModal("validation")}>
           <CheckCircle2 size={16} />

@@ -7,7 +7,7 @@ import Graph2D from "./Graph2D";
 import LayerControl from "./LayerControl";
 import Scene3D from "./Scene3D";
 import ZoomControl from "./ZoomControl";
-type Props = { children?: ReactNode } & Pick<
+type Props = { children?: ReactNode; captionActions?: ReactNode } & Pick<
   EditorController,
   | "layer"
   | "setLayer"
@@ -76,6 +76,7 @@ export default function MapViewport({
   pointerUp,
   zoom,
   children,
+  captionActions,
 }: Props) {
   return (
     <div
@@ -124,7 +125,10 @@ export default function MapViewport({
         <span className="eyebrow">
           {map.kind === "world" ? "WORLD MAP" : "REGION MAP"}
         </span>
-        <h1>{map.name}</h1>
+        <div className="map-title-row">
+          <h1>{map.name}</h1>
+          {captionActions}
+        </div>
         <p>
           {three
             ? "空间视图 / 只读预览"
@@ -160,7 +164,9 @@ export default function MapViewport({
             <MousePointer2 size={14} />
             {playing
               ? "点击开放节点探索，已完成节点可随时返回"
-              : "拖动节点布局 · 空白处拖拽平移 · 滚轮缩放"}
+              : map.kind === "world"
+                ? "右键创建 · 数字键 1–2 · 空白处拖拽平移 · 滚轮缩放"
+                : "右键创建 · 数字键 1–7 · PgUp / PgDn 换层 · Alt + 滚轮换层"}
           </>
         )}
       </div>
@@ -172,7 +178,7 @@ export default function MapViewport({
           <p>
             {playing
               ? "从世界地图起点开始探索"
-              : "从左侧添加节点，开始绘制路线"}
+              : "右键打开创建轮盘，或将鼠标移到画布按数字键"}
           </p>
         </div>
       )}

@@ -9,7 +9,10 @@ export default function LayerControl({ layer, setLayer, layers }: Props) {
         <Layers3 size={15} />
         <span>楼层</span>
       </div>
-      <Button title="进入上一层" onClick={() => setLayer(layer + 1)}>
+      <Button
+        title="进入上一层（PageUp / Alt + 滚轮向上）"
+        onClick={() => setLayer(layer + 1)}
+      >
         <Plus size={15} />
       </Button>
       <select
@@ -24,7 +27,10 @@ export default function LayerControl({ layer, setLayer, layers }: Props) {
           </option>
         ))}
       </select>
-      <Button title="进入下一层" onClick={() => setLayer(layer - 1)}>
+      <Button
+        title="进入下一层（PageDown / Alt + 滚轮向下）"
+        onClick={() => setLayer(layer - 1)}
+      >
         <Minus size={15} />
       </Button>
       <input

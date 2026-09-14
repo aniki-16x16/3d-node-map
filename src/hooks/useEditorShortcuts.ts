@@ -45,6 +45,13 @@ export function useEditorShortcuts({
   useEffect(() => {
     const listener = (e: KeyboardEvent) => {
       if (
+        e.defaultPrevented ||
+        (e.target as HTMLElement).closest(
+          '[contenteditable="true"], .canvas-ui, [role="dialog"]',
+        )
+      )
+        return;
+      if (
         ["INPUT", "TEXTAREA", "SELECT"].includes(
           (e.target as HTMLElement).tagName,
         )

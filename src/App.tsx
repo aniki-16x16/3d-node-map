@@ -1,4 +1,6 @@
 import { CheckCircle2 } from "lucide-react";
+import CanvasActions from "./components/canvas/CanvasActions";
+import MapActions from "./components/canvas/MapActions";
 import MapViewport from "./components/canvas/MapViewport";
 import EditorDialog from "./components/dialogs/EditorDialog";
 import SelectionInspector from "./components/inspector/SelectionInspector";
@@ -16,7 +18,19 @@ export default function App() {
         <MapSidebar {...editor} />
         <main>
           <ViewSwitcher {...editor} />
-          <MapViewport {...editor}>
+          <MapViewport
+            {...editor}
+            captionActions={
+              <MapActions
+                key={`${editor.map.id}-${editor.readonly}`}
+                {...editor}
+              />
+            }
+          >
+            <CanvasActions
+              key={`${editor.map.id}-${editor.three}-${editor.playing}`}
+              {...editor}
+            />
             {(editor.node || editor.edge) && <SelectionInspector {...editor} />}
           </MapViewport>
           <StatusBar {...editor} />

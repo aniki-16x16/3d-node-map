@@ -6,6 +6,7 @@ import type {
   MapNode,
   NodeType,
   Port,
+  Point,
 } from "../domain/types";
 import type {
   Commit,
@@ -95,13 +96,14 @@ export function useNodeActions({
     });
     if (copied) setSelected(copied.id);
   };
-  const addNode = (type: NodeType) => {
+  const addNode = (type: NodeType, position?: Point) => {
     if (readonly) return;
     const r = canvas.current!.getBoundingClientRect();
     const n = newNode(
       type,
-      Math.round((r.width * 0.45 - view.x) / view.k / 20) * 20,
-      Math.round((r.height * 0.45 - view.y) / view.k / 20) * 20,
+      Math.round((position?.x ?? (r.width * 0.45 - view.x) / view.k) / 20) * 20,
+      Math.round((position?.y ?? (r.height * 0.45 - view.y) / view.k) / 20) *
+        20,
       map.kind === "world" ? 0 : layer,
     );
     commit((p) => {

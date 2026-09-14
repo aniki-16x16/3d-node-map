@@ -40,6 +40,7 @@ export default function GraphNodes({
           return (
             <g
               key={n.id}
+              data-node-id={n.id}
               transform={`translate(${n.x} ${n.y})`}
               role="button"
               tabIndex={0}

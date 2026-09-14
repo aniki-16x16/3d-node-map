@@ -61,7 +61,12 @@ export function useCanvasInteraction({
   };
   const pointerDown = (e: ReactPointerEvent, id?: string) => {
     if (e.button !== 0 && e.button !== 1) return;
-    if ((e.target as Element).closest("button")) return;
+    if (
+      (e.target as Element).closest(
+        "button, input, select, textarea, .canvas-ui",
+      )
+    )
+      return;
     if (id && readonly) {
       e.stopPropagation();
       return;
@@ -153,6 +158,13 @@ export function useCanvasInteraction({
     const el = canvas.current!;
     const fn = (e: WheelEvent) => {
       if (three) return;
+      if (
+        e.altKey ||
+        (e.target as Element).closest(
+          ".canvas-ui, .drawer, input, select, button",
+        )
+      )
+        return;
       e.preventDefault();
       const r = el.getBoundingClientRect();
       zoom(Math.exp(-e.deltaY * 0.001), e.clientX - r.left, e.clientY - r.top);

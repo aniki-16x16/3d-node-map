@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { worldEdges } from "../domain/world";
+import { duplicateNode, newNode } from "../domain/project";
 import { deleteArea } from "../domain/deleteArea";
 import type { EditorTool, Modal, PendingConnection } from "./editorTypes";
 import { useCanvasInteraction } from "./useCanvasInteraction";
@@ -122,6 +123,39 @@ export function useEditorController() {
       setPending(null);
     }
   };
+  const renameMap = (name: string) => {
+    if (readonly || !name.trim()) return;
+    commit((p) => {
+      p.maps.find((m) => m.id === map.id)!.name = name.trim();
+      for (const m of p.maps)
+        for (const n of m.nodes) if (n.mapId === map.id) n.name = name.trim();
+      return p;
+    });
+  };
+  const duplicateMap = () => {
+    if (readonly || map.kind !== "area") return;
+    let copiedId: string | undefined;
+    commit((p) => {
+      const source = p.maps
+        .find((m) => m.id === world.id)!
+        .nodes.find((n) => n.mapId === map.id) ?? {
+        ...newNode("region", 200, 300),
+        mapId: map.id,
+        name: map.name,
+      };
+      copiedId = duplicateNode(
+        p,
+        world.id,
+        source,
+        source.x + 80,
+        source.y + 80,
+        0,
+      ).mapId;
+      return p;
+    });
+    if (copiedId) changeMap(copiedId);
+    notify("二级地图已复制，可撤销恢复");
+  };
   useEditorShortcuts({
     readonly,
     node,
@@ -174,6 +208,8 @@ export function useEditorController() {
     changeMap,
     readonly,
     deleteMap,
+    renameMap,
+    duplicateMap,
     visibleNodes,
     layers,
     undo,
