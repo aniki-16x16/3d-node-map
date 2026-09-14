@@ -9,7 +9,7 @@ export function portOffset(
   node: { type?: NodeType },
   port: Port,
 ): [number, number] {
-  const scale = node.type === "structure" ? 0.75 : 1;
+  const scale = node.type === "structure" ? 0.5 : 1;
   return [ports[port][0] * scale, ports[port][1] * scale];
 }
 export function route(

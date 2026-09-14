@@ -14,12 +14,30 @@ export function useProjectHistory() {
   const [saveState, setSaveState] = useState("空白项目");
   useEffect(() => {
     if (!state.dirty) return;
-    try {
-      saveDraft(state.project, localStorage);
-      setSaveState("已保存至本机");
-    } catch {
-      setSaveState("本机保存失败，请导出备份");
-    }
+    setSaveState("等待保存…");
+    let pending = true;
+    const save = () => {
+      if (!pending) return;
+      clearTimeout(timer);
+      pending = false;
+      try {
+        saveDraft(state.project, localStorage);
+        setSaveState("已保存至本机");
+      } catch {
+        setSaveState("本机保存失败，请导出备份");
+      }
+    };
+    const timer = setTimeout(save, 500);
+    const saveWhenHidden = () => {
+      if (document.visibilityState === "hidden") save();
+    };
+    window.addEventListener("pagehide", save);
+    document.addEventListener("visibilitychange", saveWhenHidden);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("pagehide", save);
+      document.removeEventListener("visibilitychange", saveWhenHidden);
+    };
   }, [state.project, state.dirty]);
   const commit: Commit = useCallback((update) => {
     const project =

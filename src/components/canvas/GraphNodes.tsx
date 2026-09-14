@@ -66,7 +66,7 @@ export default function GraphNodes({
                 width="48"
                 height="48"
                 rx="5"
-                transform={`rotate(45) scale(${n.type === "structure" ? 0.75 : 1})`}
+                transform={`rotate(45) scale(${n.type === "structure" ? 0.5 : 1})`}
               />
               {n.type !== "structure" &&
                 (locked ? (
@@ -93,8 +93,8 @@ export default function GraphNodes({
                 Object.entries(ports).map(([port, [x, y]]) => (
                   <circle
                     key={port}
-                    cx={x * (n.type === "structure" ? 0.75 : 1)}
-                    cy={y * (n.type === "structure" ? 0.75 : 1)}
+                    cx={x * (n.type === "structure" ? 0.5 : 1)}
+                    cy={y * (n.type === "structure" ? 0.5 : 1)}
                     r="6"
                     className={`port ${pending?.id === n.id && pending.port === port ? "pending" : ""}`}
                     onPointerDown={(e) => e.stopPropagation()}

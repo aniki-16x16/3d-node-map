@@ -90,7 +90,7 @@ export function buildMapObjects(
               : "#1d2c37",
       }),
     );
-    if (n.type === "structure") mesh.geometry.scale(0.75, 0.75, 1);
+    if (n.type === "structure") mesh.geometry.scale(0.5, 0.5, 1);
     mesh.rotation.x = -Math.PI / 2;
     mesh.position.copy(pos(n));
     mesh.userData.id = n.id;

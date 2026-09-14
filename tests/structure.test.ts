@@ -26,6 +26,6 @@ test("structure nodes preserve conditions through import and duplication and use
   progress.keys.push("key");
   assert.equal(conditionPass(structure.enter, progress), true);
   const points = route(structure, newNode("battle", 200, 0), "right", "left");
-  assert.deepEqual(points[0], { x: 25.5, y: 0 });
+  assert.deepEqual(points[0], { x: 17, y: 0 });
   assert.deepEqual(points.at(-1), { x: 166, y: 0 });
 });
