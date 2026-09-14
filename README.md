@@ -11,6 +11,8 @@ npm run dev
 
 打开终端给出的本地地址。`npm run typecheck` 执行严格类型检查；`npm run build` 先检查类型再输出静态文件到 `dist`；`npm test` 验证探索规则、历史记录和草稿存储。
 
+生产构建将 React / React DOM 19.3.0 和 Three.js 0.180.0 排除出本地产物，通过 HTML import map 从 CDN 加载：React 使用 esm.sh，Three.js（含 OrbitControls）使用 jsDelivr。固定版本及入口映射集中在 `vite.config.ts`，升级依赖时需同步调整。部署后首次加载需要访问这些 CDN；`npm run dev` 仍使用本机安装的依赖。
+
 ## 代码结构
 
 - `src/App.tsx`：组装编辑器页面；`main.tsx` 仅负责挂载。
