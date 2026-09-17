@@ -163,10 +163,21 @@
 .node-pick-confirm {
   position: absolute;
   z-index: 11;
+  transform: translate(-50%, -100%);
 }
 .node-pick-confirm button {
-  padding: 7px;
+  width: 38px;
+  height: 38px;
+  padding: 6px;
+  border-radius: 8px;
+  background: #6c9284;
+  border: 1px solid #b8e6cf;
+  color: #e0ff8c;
   box-shadow: 0 3px 12px #0006;
+}
+.node-pick-confirm button:hover {
+  background: #83aa9a;
+  color: #f0ffbc;
 }
 .picking-node .map-node {
   cursor: crosshair;

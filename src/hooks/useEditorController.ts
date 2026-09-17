@@ -1,3 +1,4 @@
+import { canPickNode } from "../domain/nodePicking";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { TargetRequest } from "../components/inspector/TargetSelectionContext";
 import type { ViewTransform } from "./editorTypes";
@@ -115,7 +116,12 @@ export function useEditorController() {
     selectedIds: selectedIds.length ? selectedIds : selected ? [selected] : [],
     selectNodes,
   });
+  const restoringPick = useRef(false);
   useEffect(() => {
+    if (restoringPick.current) {
+      restoringPick.current = false;
+      return;
+    }
     setSelected(null);
     setSelectedEdge(null);
   }, [layer, three]);
@@ -130,6 +136,33 @@ export function useEditorController() {
       tool,
       pending,
     };
+    if (targetRequest?.type === "exit-target") {
+      const destination = project.maps.find(
+        (m) => m.id === targetRequest.mapId,
+      );
+      const entry =
+        destination?.nodes.find(
+          (n) =>
+            n.id === targetRequest.ref &&
+            canPickNode(project, targetRequest, n.id),
+        ) ??
+        destination?.nodes.find((n) =>
+          canPickNode(project, targetRequest, n.id),
+        );
+      if (destination) {
+        setMapId(destination.id);
+        setLayer(entry?.z ?? 0);
+        if (entry)
+          viewport.setView((v) => ({
+            ...v,
+            x:
+              (viewport.canvas.current?.clientWidth ?? 800) / 2 - entry.x * v.k,
+            y:
+              (viewport.canvas.current?.clientHeight ?? 600) / 2 -
+              entry.y * v.k,
+          }));
+      }
+    }
     setPickingNode(true);
     setSelected(null);
     setSelectedEdge(null);
@@ -140,10 +173,12 @@ export function useEditorController() {
   const finishNodePick = (id?: string) => {
     const origin = pickOrigin.current;
     if (!origin) return;
+    if (id && !canPickNode(project, targetRequest, id)) return;
     if (id && targetRequest) {
       targetRequest.onSelect(id);
       setTargetRequest({ ...targetRequest, ref: id });
     }
+    restoringPick.current = layer !== origin.layer || three !== origin.three;
     setMapId(origin.mapId);
     setLayer(origin.layer);
     setSelected(origin.selected);
@@ -325,7 +360,7 @@ export function useEditorController() {
     onNode: (id: string) => {
       if (didDrag.current || tool === "hand") return;
       if (pickingNode) {
-        if (!didDrag.current) {
+        if (canPickNode(project, targetRequest, id)) {
           setSelected(id);
           setSelectedEdge(null);
         }

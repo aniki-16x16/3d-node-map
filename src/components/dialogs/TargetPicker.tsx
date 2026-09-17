@@ -31,7 +31,13 @@ export default function TargetPicker({
   return (
     <Modal
       open={!!targetRequest && !pickingNode}
-      title={request?.type === "key" ? "选择钥匙" : "选择条件节点"}
+      title={
+        request?.type === "key"
+          ? "选择钥匙"
+          : request?.type === "exit-target"
+            ? "选择出口目标"
+            : "选择条件节点"
+      }
       onClose={closeTarget}
       className="target-picker"
     >
@@ -46,7 +52,9 @@ export default function TargetPicker({
         request && (
           <>
             <p className="muted small">
-              在现有画布中选择节点，点击节点旁的勾确认。可以切换地图和楼层。
+              {request.type === "exit-target"
+                ? "选择区域入口或世界地图上的城镇，点击节点正上方的勾确认。可以切换地图和楼层。"
+                : "在现有画布中选择节点，点击节点正上方的勾确认。可以切换地图和楼层。"}
             </p>
             {(() => {
               const m = project.maps.find((m) =>

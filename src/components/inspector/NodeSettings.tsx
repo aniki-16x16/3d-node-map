@@ -1,7 +1,8 @@
+import { resolveExitTarget } from "../../domain/nodePicking";
+import { useTargetSelection } from "./TargetSelectionContext";
 import { useState } from "react";
 import Modal from "../ui/Modal";
 import KeyManager from "../dialogs/KeyManager";
-import Select from "../ui/Select";
 import {
   ArrowUpRight,
   Copy,
@@ -45,10 +46,17 @@ export default function NodeSettings({
   deleteSelection,
   duplicate,
 }: Props) {
+  const requestTarget = useTargetSelection();
   const [choosingReward, setChoosingReward] = useState(false);
   if (!node) return null;
   const reward = availableKeys(project, map.id).find(
     (key) => key.id === node.rewards[0],
+  );
+  const targetMap = project.maps.find(
+    (m) => m.id === world.nodes.find((n) => n.id === node.target)?.mapId,
+  );
+  const targetEntry = targetMap?.nodes.find(
+    (n) => n.id === node.targetEntry && n.type === "entrance",
   );
   return (
     <>
@@ -139,53 +147,28 @@ export default function NodeSettings({
       <fieldset disabled={readonly}>
         {node.type === "exit" && (
           <div className="drawer-section">
-            <label>出口目标 · 世界节点</label>
-            <Select
-              aria-label="出口目标"
-              value={node.target || ""}
-              onChange={(e) =>
-                updateNode({
-                  target: e.target.value,
-                  targetEntry: "",
+            <label>出口目标</label>
+            <Button
+              title="从画布选择出口目标"
+              onClick={() =>
+                requestTarget({
+                  type: "exit-target",
+                  ref: targetEntry?.id || node.target || "",
+                  mapId: targetMap?.id || world.id,
+                  onSelect: (id) => {
+                    const target = resolveExitTarget(project, id);
+                    if (target) updateNode(target);
+                  },
                 })
               }
             >
-              <option value="">选择目标…</option>
-              {world.nodes.map((n) => (
-                <option key={n.id} value={n.id}>
-                  {n.name} · {TYPES[n.type]}
-                </option>
-              ))}
-            </Select>
-            {world.nodes.find((n) => n.id === node.target)?.type ===
-              "region" && (
-              <>
-                <label>目标入口</label>
-                <Select
-                  aria-label="目标入口"
-                  value={node.targetEntry || ""}
-                  onChange={(e) =>
-                    updateNode({
-                      targetEntry: e.target.value,
-                    })
-                  }
-                >
-                  <option value="">选择入口…</option>
-                  {project.maps
-                    .find(
-                      (m) =>
-                        m.id ===
-                        world.nodes.find((n) => n.id === node.target)?.mapId,
-                    )
-                    ?.nodes.filter((n) => n.type === "entrance")
-                    .map((n) => (
-                      <option key={n.id} value={n.id}>
-                        {n.name}
-                      </option>
-                    ))}
-                </Select>
-              </>
-            )}
+              <ArrowUpRight size={16} />
+              {targetEntry
+                ? targetMap!.name + " · " + targetEntry.name
+                : world.nodes.find(
+                    (n) => n.id === node.target && n.type === "town",
+                  )?.name || "从画布选择入口或城镇…"}
+            </Button>
             <p className="muted small">对应世界路线自动生成。</p>
           </div>
         )}

@@ -1,6 +1,6 @@
 import { createContext, useContext } from "react";
 export interface TargetRequest {
-  type: "key" | "visited";
+  type: "key" | "visited" | "exit-target";
   ref: string;
   mapId: string;
   onSelect: (id: string) => void;
