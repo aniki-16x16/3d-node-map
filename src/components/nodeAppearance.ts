@@ -9,9 +9,10 @@ import {
   Mountain,
   Store,
   Swords,
+  Skull,
   Tent,
 } from "lucide-react";
-import type { NodeType } from "../domain/types";
+import type { MapNode, NodeType } from "../domain/types";
 export const ICONS: Record<NodeType, LucideIcon> = {
   structure: createLucideIcon("Structure", [
     [
@@ -51,3 +52,8 @@ export const colors: Record<NodeType, string> = {
   entrance: "#97c8e1",
   exit: "#b6a2de",
 };
+
+export const nodeIcon = (node: MapNode): LucideIcon =>
+  node.type === "battle" && node.boss ? Skull : ICONS[node.type];
+export const nodeColor = (node: MapNode): string =>
+  node.type === "battle" && node.boss ? "#ef7078" : colors[node.type];

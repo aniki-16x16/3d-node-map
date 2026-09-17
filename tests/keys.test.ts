@@ -20,12 +20,14 @@ function fixture() {
     { id: "local", name: "L", mapId: "a" },
   ];
   const n = newNode("chest", 0, 0);
-  n.rewards = ["global", "local"];
+  n.rewards = ["local"];
   n.enter = {
     op: "all",
     rules: [{ op: "any", rules: [{ type: "key", ref: "local", not: false }] }],
   };
-  p.maps[1].nodes.push(n);
+  const globalChest = newNode("chest", 100, 0);
+  globalChest.rewards = ["global"];
+  p.maps[1].nodes.push(n, globalChest);
   return { p, n };
 }
 test("key options combine global and current area only", () => {
@@ -56,7 +58,10 @@ test("duplicated areas get independent local keys and nested references", () => 
   const key = p.keys.find((k) => k.mapId === copy.mapId)!;
   assert.notEqual(key.id, "local");
   const node = p.maps.find((m) => m.id === copy.mapId)!.nodes[0];
-  assert.deepEqual(node.rewards, ["global", key.id]);
+  assert.deepEqual(node.rewards, [key.id]);
+  assert.deepEqual(p.maps.find((m) => m.id === copy.mapId)!.nodes[1].rewards, [
+    "global",
+  ]);
   assert.ok(JSON.stringify(node.enter).includes(key.id));
   assert.deepEqual(
     parseProject(JSON.stringify(p)),
@@ -66,9 +71,11 @@ test("duplicated areas get independent local keys and nested references", () => 
 test("cross-area copies drop inaccessible rewards and nested conditions", () => {
   const { p, n } = fixture();
   const copy = duplicateNode(p, "b", n, 0, 0, 0);
-  assert.deepEqual(copy.rewards, ["global"]);
+  assert.deepEqual(copy.rewards, []);
+  const globalCopy = duplicateNode(p, "b", p.maps[1].nodes[1], 100, 0, 0);
+  assert.deepEqual(globalCopy.rewards, ["global"]);
   assert.ok(!JSON.stringify(copy.enter).includes("local"));
-  assert.deepEqual(n.rewards, ["global", "local"]);
+  assert.deepEqual(n.rewards, ["local"]);
 });
 test("import rejects missing scopes, invalid owners and cross-area references", () => {
   const { p, n } = fixture();

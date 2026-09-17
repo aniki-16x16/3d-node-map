@@ -1,7 +1,7 @@
 import type { CSSProperties } from "react";
 import type { MapNode, MapEdge } from "../../domain/types";
 import { route } from "../../domain/routing";
-import { ICONS, colors } from "../nodeAppearance";
+import { nodeIcon, nodeColor } from "../nodeAppearance";
 export default function ReferenceLayer({
   layer,
   nodes,
@@ -30,13 +30,13 @@ export default function ReferenceLayer({
         );
       })}
       {referenceNodes.map((node) => {
-        const Icon = ICONS[node.type];
+        const Icon = nodeIcon(node);
         return (
           <g
             key={node.id}
             className="map-node reference-node"
             transform={`translate(${node.x} ${node.y})`}
-            style={{ "--node-color": colors[node.type] } as CSSProperties}
+            style={{ "--node-color": nodeColor(node) } as CSSProperties}
           >
             <rect
               className={`diamond ${node.type === "structure" ? "structure-shape" : ""}`}

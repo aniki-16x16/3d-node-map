@@ -3,12 +3,13 @@ import { Check, MapPin, Settings2, Trash2 } from "lucide-react";
 import React from "react";
 import { TYPES } from "../../domain";
 import type { EditorController } from "../../hooks/useEditorController";
-import { ICONS, colors } from "../nodeAppearance";
+import { nodeIcon, nodeColor } from "../nodeAppearance";
 import Button from "../ui/Button";
 import Drawer from "../ui/Drawer";
 import NodeSettings from "./NodeSettings";
 type Props = Pick<
   EditorController,
+  | "commit"
   | "project"
   | "setLayer"
   | "setSelected"
@@ -30,6 +31,7 @@ type Props = Pick<
   | "status"
 >;
 export default function SelectionInspector({
+  commit,
   project,
   setLayer,
   setSelected,
@@ -68,8 +70,8 @@ export default function SelectionInspector({
       {node ? (
         <>
           <div className="node-heading">
-            <span style={{ color: colors[node.type] }}>
-              {React.createElement(ICONS[node.type], { size: 26 })}
+            <span style={{ color: nodeColor(node) }}>
+              {React.createElement(nodeIcon(node), { size: 26 })}
             </span>
             <div>
               <h3>{node.name}</h3>
@@ -116,6 +118,7 @@ export default function SelectionInspector({
           ) : (
             <NodeSettings
               {...{
+                commit,
                 project,
                 setLayer,
                 setModal,

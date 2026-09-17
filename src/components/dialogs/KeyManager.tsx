@@ -1,13 +1,28 @@
-import { KeyRound, Plus, Trash2 } from "lucide-react";
+import { Check, KeyRound, Plus, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { allNodes, uid } from "../../domain";
 import type { EditorController } from "../../hooks/useEditorController";
 import Button from "../ui/Button";
 import RadioGroup from "../ui/RadioGroup";
 
-type Props = Pick<EditorController, "project" | "map" | "readonly" | "commit">;
-export default function KeyManager({ project, map, readonly, commit }: Props) {
-  const [scope, setScope] = useState(map.kind === "area" ? map.id : "world");
+type Props = Pick<
+  EditorController,
+  "project" | "map" | "readonly" | "commit"
+> & { selectedKeyId?: string; onSelect?: (id: string) => void };
+export default function KeyManager({
+  project,
+  map,
+  readonly,
+  commit,
+  selectedKeyId,
+  onSelect,
+}: Props) {
+  const [scope, setScope] = useState(() => {
+    const key = project.keys.find((k) => k.id === selectedKeyId);
+    return key
+      ? (key.mapId ?? project.maps.find((m) => m.kind === "world")!.id)
+      : map.id;
+  });
   const [editingId, setEditingId] = useState<string | null>(null);
   const selected = project.maps.find((m) => m.id === scope);
   const mapId = selected?.kind === "area" ? selected.id : null;
@@ -39,7 +54,23 @@ export default function KeyManager({ project, map, readonly, commit }: Props) {
       <div className="key-grid">
         {keys.map((k) => (
           <div className="key-cell" key={k.id}>
-            <KeyRound size={18} />
+            {onSelect ? (
+              <Button
+                title={selectedKeyId === k.id ? "已选为奖励" : "选为奖励"}
+                disabled={readonly}
+                active={selectedKeyId === k.id}
+                onClick={() => onSelect(k.id)}
+              >
+                {selectedKeyId === k.id ? (
+                  <Check size={18} />
+                ) : (
+                  <KeyRound size={18} />
+                )}
+                {selectedKeyId === k.id ? "已选" : "选用"}
+              </Button>
+            ) : (
+              <KeyRound size={18} />
+            )}
             <input
               aria-label="钥匙名称"
               placeholder="输入钥匙名称"

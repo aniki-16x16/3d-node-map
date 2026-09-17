@@ -3,7 +3,7 @@ import type { CSSProperties } from "react";
 import { TYPES, ports } from "../../domain";
 import type { Port } from "../../domain/types";
 import type { EditorController } from "../../hooks/useEditorController";
-import { ICONS, colors } from "../nodeAppearance";
+import { nodeIcon, nodeColor } from "../nodeAppearance";
 type Props = Pick<
   EditorController,
   | "layer"
@@ -36,7 +36,7 @@ export default function GraphNodes({
       {visibleNodes
         .filter((n) => n.z === layer)
         .map((n) => {
-          const Icon = ICONS[n.type],
+          const Icon = nodeIcon(n),
             locked = playing && !activeProgress.unlocked.includes(n.id),
             done = playing && activeProgress.completed.includes(n.id);
           return (
@@ -54,7 +54,7 @@ export default function GraphNodes({
                 }
               }}
               className={`map-node ${n.id === selected || selectedIds.includes(n.id) ? "selected" : ""} ${locked ? "locked" : ""} ${done ? "done" : ""}`}
-              style={{ "--node-color": colors[n.type] } as CSSProperties}
+              style={{ "--node-color": nodeColor(n) } as CSSProperties}
               onPointerDown={(e) => pointerDown(e, n.id)}
               onClick={(e) => {
                 e.stopPropagation();

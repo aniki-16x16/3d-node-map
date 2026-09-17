@@ -1,3 +1,6 @@
+import { useState } from "react";
+import Modal from "../ui/Modal";
+import KeyManager from "../dialogs/KeyManager";
 import Select from "../ui/Select";
 import {
   ArrowUpRight,
@@ -14,6 +17,7 @@ import Button from "../ui/Button";
 import ConditionEditor from "./ConditionEditor";
 type Props = Pick<
   EditorController,
+  | "commit"
   | "project"
   | "setLayer"
   | "setModal"
@@ -30,7 +34,7 @@ type Props = Pick<
 export default function NodeSettings({
   project,
   setLayer,
-  setModal,
+  commit,
   world,
   map,
   node,
@@ -41,7 +45,11 @@ export default function NodeSettings({
   deleteSelection,
   duplicate,
 }: Props) {
+  const [choosingReward, setChoosingReward] = useState(false);
   if (!node) return null;
+  const reward = availableKeys(project, map.id).find(
+    (key) => key.id === node.rewards[0],
+  );
   return (
     <>
       <fieldset disabled={readonly}>
@@ -72,6 +80,16 @@ export default function NodeSettings({
               />
             </div>
           </div>
+          {node.type === "battle" && (
+            <label className="check-label">
+              <input
+                type="checkbox"
+                checked={node.boss ?? false}
+                onChange={(e) => updateNode({ boss: e.target.checked })}
+              />
+              Boss 战斗
+            </label>
+          )}
           {map.kind === "world" && (
             <label className="check-label">
               <input
@@ -177,28 +195,29 @@ export default function NodeSettings({
               <KeyRound size={14} />
               完成奖励
             </label>
-            {availableKeys(project, map.id).map((k) => (
-              <label key={k.id} className="check-label">
-                <input
-                  type="checkbox"
-                  checked={node.rewards.includes(k.id)}
-                  onChange={(e) =>
-                    updateNode({
-                      rewards: e.target.checked
-                        ? [...node.rewards, k.id]
-                        : node.rewards.filter((id) => id !== k.id),
-                    })
-                  }
-                />
-                {k.name} · {k.mapId === null ? "全局" : "局部"}
-              </label>
-            ))}
+            <p className="muted small">最多奖励一把钥匙。</p>
+            {reward && (
+              <div className="linked-map">
+                <KeyRound size={16} />
+                <span>
+                  {reward.name || "未命名钥匙"} ·{" "}
+                  {reward.mapId === null ? "全局" : "局部"}
+                </span>
+                <Button
+                  title="清除奖励钥匙"
+                  onClick={() => updateNode({ rewards: [] })}
+                >
+                  <Trash2 size={15} />
+                </Button>
+              </div>
+            )}
             <Button
               className="text-button"
-              title="管理钥匙"
-              onClick={() => setModal("keys")}
+              title="管理并选择奖励钥匙"
+              onClick={() => setChoosingReward(true)}
             >
-              管理钥匙 <ArrowUpRight size={13} />
+              {reward ? "更换奖励钥匙" : "管理钥匙并选择奖励"}{" "}
+              <ArrowUpRight size={13} />
             </Button>
           </div>
         )}
@@ -229,6 +248,22 @@ export default function NodeSettings({
           />
         </div>
       </fieldset>
+      <Modal
+        open={choosingReward}
+        title="选择完成奖励 · 钥匙管理"
+        className="key-modal"
+        onClose={() => setChoosingReward(false)}
+      >
+        <KeyManager
+          key={node.id}
+          {...{ project, map, readonly, commit }}
+          selectedKeyId={node.rewards[0]}
+          onSelect={(id) => {
+            updateNode({ rewards: [id] });
+            setChoosingReward(false);
+          }}
+        />
+      </Modal>
       {!readonly && (
         <div className="drawer-footer">
           <Button title="复制节点" onClick={duplicate}>

@@ -4,7 +4,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import * as THREE from "three";
 import { route } from "../../../domain/routing";
 import type { Position } from "../../../domain/types";
-import { colors, ICONS as icons } from "../../nodeAppearance";
+import { nodeColor, nodeIcon } from "../../nodeAppearance";
 import type { SceneData } from "./types";
 export function buildMapObjects(
   scene: THREE.Scene,
@@ -99,15 +99,15 @@ export function buildMapObjects(
     const border = new THREE.LineSegments(
       new THREE.EdgesGeometry(mesh.geometry),
       new THREE.LineBasicMaterial({
-        color: colors[n.type],
+        color: nodeColor(n),
       }),
     );
     mesh.add(border);
     if (n.type !== "structure") {
       const svg = renderToStaticMarkup(
-        React.createElement(locked ? LockKeyhole : icons[n.type], {
+        React.createElement(locked ? LockKeyhole : nodeIcon(n), {
           size: 96,
-          color: locked ? "#81909a" : colors[n.type],
+          color: locked ? "#81909a" : nodeColor(n),
           strokeWidth: 1.6,
         }),
       );

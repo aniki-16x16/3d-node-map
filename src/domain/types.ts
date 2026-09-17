@@ -36,6 +36,7 @@ export interface MapNode extends Position {
   show: ConditionGroup;
   enter: ConditionGroup;
   rewards: string[];
+  boss?: boolean;
   mapId?: string;
   target?: string;
   targetEntry?: string;

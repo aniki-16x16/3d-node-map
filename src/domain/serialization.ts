@@ -57,6 +57,8 @@ function node(v: unknown, kind: AtlasMap["kind"]): v is MapNode {
     condition(v.show) &&
     condition(v.enter) &&
     strings(v.rewards) &&
+    v.rewards.length <= 1 &&
+    (v.boss === undefined || typeof v.boss === "boolean") &&
     optionalString(v.mapId) &&
     optionalString(v.target) &&
     optionalString(v.targetEntry)
