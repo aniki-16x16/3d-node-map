@@ -85,33 +85,19 @@ test("arbitrary completed nodes can be revisited without sequential movement", (
   assert.equal(r.state.current, "entry");
   assert(!r.error);
 });
-test("nested AND/OR and negative cross-area conditions", () => {
-  const s = { ...blankProgress(), keys: ["copper"], reached: ["entry"] };
-  assert(
-    conditionPass(
-      {
-        op: "all",
-        rules: [
-          { type: "key", ref: "moon", not: true },
-          {
-            op: "any",
-            rules: [
-              { type: "visited", ref: "entry", not: false },
-              { type: "key", ref: "moon", not: false },
-            ],
-          },
-        ],
-      },
-      s,
-    ),
-  );
+test("card AND/OR combinations evaluate positive key and cross-area node rules", () => {
+ const state = {...blankProgress(), keys: ["copper"], reached: ["entry"]};
+ const condition = {op: "all" as const, groups: [{op: "all" as const, rules: [{type: "key" as const, ref: "copper"}]}, {op: "any" as const, rules: [{type: "visited" as const, ref: "entry"}, {type: "key" as const, ref: "moon"}]}]};
+ assert.equal(conditionPass(condition, state), true);
+ assert.equal(conditionPass(condition, {...state, reached: []}), false);
+ assert.equal(conditionPass({...condition, op: "any"}, {...state, reached: []}), true);
 });
 test("directional routes and start conditions", () => {
   const p = demoProject(),
     w = p.maps[0];
   w.nodes.find((n) => n.id === "camp")!.show = {
     op: "all",
-    rules: [{ type: "key", ref: "moon", not: false }],
+    groups: [{op: "all", rules: [{ type: "key", ref: "moon" }]}],
   };
   w.edges[0].directed = true;
   let s = settle(p, blankProgress());
@@ -143,8 +129,8 @@ test("duplicating an area remaps local condition references and connections", ()
   assert(area.nodes.some((n) => n.id === area.defaultEntry));
   const secret = area.nodes.find((n) => n.name === "月之秘藏")!,
     shop = area.nodes.find((n) => n.name === "树梢商人")!;
-  assert("ref" in secret.show.rules[0]);
-  assert.equal(secret.show.rules[0].ref, shop.id);
+  assert("ref" in secret.show.groups[0].rules[0]);
+  assert.equal(secret.show.groups[0].rules[0].ref, shop.id);
   assert.notEqual(shop.id, "shop1");
   assert.doesNotThrow(() => parseProject(JSON.stringify(p)));
   assert.doesNotThrow(() => parseProject(JSON.stringify(blankProject())));

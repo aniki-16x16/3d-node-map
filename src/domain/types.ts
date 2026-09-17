@@ -17,17 +17,9 @@ export interface Point {
 export interface Position extends Point {
   z: number;
 }
-export interface ConditionRule {
-  type: "key" | "visited";
-  ref: string;
-  not: boolean;
-  rules?: never;
-}
-export interface ConditionGroup {
-  op: "all" | "any";
-  rules: Condition[];
-}
-export type Condition = ConditionRule | ConditionGroup;
+export interface ConditionRule { type: "key" | "visited"; ref: string }
+export interface ConditionCard { op: "all" | "any"; rules: ConditionRule[] }
+export interface ConditionGroup { op: "all" | "any"; groups: ConditionCard[] }
 export interface MapNode extends Position {
   id: string;
   type: NodeType;
@@ -65,7 +57,7 @@ export interface KeyResource {
   name: string;
 }
 export interface Project {
-  version: 1;
+  version: 2;
   name: string;
   keys: KeyResource[];
   maps: AtlasMap[];

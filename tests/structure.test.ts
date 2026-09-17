@@ -9,7 +9,7 @@ import { blankProgress } from "../src/domain/exploration";
 test("structure nodes preserve conditions through import and duplication and use smaller ports", () => {
   const project = blankProject();
   const structure = newNode("structure", 0, 0);
-  structure.enter.rules.push({ type: "key", ref: "key", not: false });
+  structure.enter.groups.push({op: "all", rules: [{ type: "key", ref: "key" }]});
   project.maps.push({
     id: "area",
     kind: "area",

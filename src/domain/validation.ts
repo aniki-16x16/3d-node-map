@@ -5,13 +5,9 @@ export function validate(p: Project): string[] {
     nodes = allNodes(p),
     ids = new Set(nodes.map((n) => n.id));
   const check = (c: ConditionGroup, name: string, mapId: string): void =>
-    c?.rules?.forEach((r) =>
-      r.rules
-        ? check(r, name, mapId)
-        : !(r.type === "key" ? availableKeys(p, mapId) : nodes).some(
-            (i) => i.id === r.ref,
-          ) && errors.push(`${name}：条件引用已失效`),
-    );
+    c.groups.forEach((group) => group.rules.forEach((r) => {
+      if (!(r.type === "key" ? availableKeys(p, mapId) : nodes).some((i) => i.id === r.ref)) errors.push(name + "：条件引用已失效");
+    }));
   if (ids.size !== nodes.length) errors.push("节点 ID 重复");
   const world = p.maps.find((m) => m.kind === "world")!;
   if (!world.nodes.some((n) => n.start)) errors.push("世界地图没有起点");

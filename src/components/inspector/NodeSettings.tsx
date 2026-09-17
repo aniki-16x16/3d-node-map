@@ -213,8 +213,7 @@ export default function NodeSettings({
           <ConditionEditor
             value={node.show}
             project={project}
-            mapId={map.id}
-            onChange={(show) => updateNode({ show })}
+            field="show"
           />
         </div>
         <div className="drawer-section">
@@ -226,8 +225,7 @@ export default function NodeSettings({
           <ConditionEditor
             value={node.enter}
             project={project}
-            mapId={map.id}
-            onChange={(enter) => updateNode({ enter })}
+            field="enter"
           />
         </div>
       </fieldset>

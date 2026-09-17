@@ -12,7 +12,7 @@ export const TYPES: Record<NodeType, string> = {
   exit: "出口",
 };
 export const uid = () => crypto.randomUUID();
-export const emptyCondition = (): ConditionGroup => ({ op: "all", rules: [] });
+export const emptyCondition = (): ConditionGroup => ({ op: "all", groups: [] });
 export const newNode = (
   type: NodeType,
   x: number,
@@ -31,7 +31,7 @@ export const newNode = (
   rewards: [],
 });
 export const blankProject = (): Project => ({
-  version: 1,
+  version: 2,
   name: "未命名地图",
   keys: [],
   maps: [
@@ -65,16 +65,10 @@ export function duplicateNode(
           .filter((k) => k.mapId === original.id)
           .map((k) => [k.id, uid()]),
       );
-      const remap = (c: ConditionGroup) =>
-        c.rules.forEach((r) =>
-          r.rules
-            ? remap(r)
-            : r.type === "key"
-              ? keyIds.has(r.ref) && (r.ref = keyIds.get(r.ref)!)
-              : r.type === "visited" &&
-                ids.has(r.ref) &&
-                (r.ref = ids.get(r.ref)!),
-        );
+      const remap = (c: ConditionGroup) => c.groups.forEach((g) => g.rules.forEach((r) => {
+        if (r.type === "key" && keyIds.has(r.ref)) r.ref = keyIds.get(r.ref)!;
+        if (r.type === "visited" && ids.has(r.ref)) r.ref = ids.get(r.ref)!;
+      }));
       area.id = uid();
       area.name = copy.name;
       project.keys.push(
@@ -104,15 +98,9 @@ export function duplicateNode(
     }
   }
   const allowed = new Set(availableKeys(project, mapId).map((k) => k.id));
-  const clean = (group: ConditionGroup) => {
-    group.rules = group.rules.filter(
-      (r) =>
-        r.rules ||
-        r.type !== "key" ||
-        !project.keys.some((k) => k.id === r.ref) ||
-        allowed.has(r.ref),
-    );
-    for (const r of group.rules) if (r.rules) clean(r);
+  const clean = (condition: ConditionGroup) => {
+    for (const group of condition.groups) group.rules = group.rules.filter((r) => r.type !== "key" || !project.keys.some((k) => k.id === r.ref) || allowed.has(r.ref));
+    condition.groups = condition.groups.filter((g) => g.rules.length);
   };
   copy.rewards = copy.rewards.filter((id) => allowed.has(id));
   clean(copy.show);

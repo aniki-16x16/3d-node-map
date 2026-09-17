@@ -23,7 +23,7 @@ function fixture() {
   n.rewards = ["local"];
   n.enter = {
     op: "all",
-    rules: [{ op: "any", rules: [{ type: "key", ref: "local", not: false }] }],
+    groups: [{ op: "any", rules: [{ type: "key", ref: "local" }] }],
   };
   const globalChest = newNode("chest", 100, 0);
   globalChest.rewards = ["global"];

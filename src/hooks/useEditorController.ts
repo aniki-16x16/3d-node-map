@@ -1,3 +1,5 @@
+import { useConditionWorkspace } from "./useConditionWorkspace";
+import type { ConditionField } from "./useConditionWorkspace";
 import { canPickNode } from "../domain/nodePicking";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { TargetRequest } from "../components/inspector/TargetSelectionContext";
@@ -53,6 +55,17 @@ export function useEditorController() {
     tool: EditorTool;
     pending: PendingConnection | null;
   } | null>(null);
+  const conditionOrigin = useRef<{ mapId: string; layer: number; selected: string | null; selectedEdge: string | null; view: ViewTransform; three: boolean; tool: EditorTool } | null>(null);
+  const conditions = useConditionWorkspace(commit, () => {
+    const origin = conditionOrigin.current;
+    if (!origin) return;
+    restoringPick.current = layer !== origin.layer || three !== origin.three;
+    setMapId(origin.mapId); setLayer(origin.layer); setSelected(origin.selected); setSelectedEdge(origin.selectedEdge);
+    viewport.setView(origin.view); setThree(origin.three); setTool(origin.tool);
+    conditionOrigin.current = null;
+  });
+  const { conditionSession } = conditions;
+  const conditionPicking = conditionSession?.pickCard != null;
   const [toast, setToast] = useState("");
   const didDrag = useRef(false);
   const notify = (message: string) => setToast(message);
@@ -89,7 +102,7 @@ export function useEditorController() {
     notify,
   });
   const { playing, activeProgress, setProgress } = preview,
-    readonly = playing || three || pickingNode;
+    readonly = playing || three || pickingNode || !!conditionSession;
   const visibleNodes = useMemo(
     () =>
       map.nodes.filter(
@@ -113,8 +126,9 @@ export function useEditorController() {
     setSelected,
     setSelectedEdge,
     didDrag,
-    selectedIds: selectedIds.length ? selectedIds : selected ? [selected] : [],
-    selectNodes,
+    selectionOnly: conditionPicking,
+    selectedIds: conditionPicking ? conditionSession!.picked : selectedIds.length ? selectedIds : selected ? [selected] : [],
+    selectNodes: conditionPicking ? conditions.setConditionPicked : selectNodes,
   });
   const restoringPick = useRef(false);
   useEffect(() => {
@@ -191,6 +205,17 @@ export function useEditorController() {
     pickOrigin.current = null;
   };
   useEffect(() => {
+    if (conditionSession) {
+      const keydown = (e: KeyboardEvent) => {
+        if (e.key === "Escape" && conditionPicking) { e.preventDefault(); e.stopImmediatePropagation(); conditions.cancelConditionPick(); }
+        if ((e.target as HTMLElement).closest("input, select, textarea, button, .canvas-ui")) return;
+        if (e.key === "PageUp" || e.key === "PageDown") { e.preventDefault(); setLayer((z) => map.kind === "world" ? 0 : z + (e.key === "PageUp" ? 1 : -1)); }
+        if (e.key === "v") setTool("select");
+        if (e.key === "h") setTool("hand");
+      };
+      window.addEventListener("keydown", keydown, true);
+      return () => window.removeEventListener("keydown", keydown, true);
+    }
     if (!pickingNode) return;
     const keydown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
@@ -287,7 +312,7 @@ export function useEditorController() {
   };
   useEditorShortcuts({
     readonly,
-    pickingNode,
+    pickingNode: pickingNode || !!conditionSession,
     node,
     map,
     layer,
@@ -319,7 +344,7 @@ export function useEditorController() {
     layer,
     setLayer,
     selected,
-    selectedIds,
+    selectedIds: conditionPicking ? conditionSession!.picked : selectedIds,
     setSelected,
     selectedEdge,
     setSelectedEdge,
@@ -347,7 +372,14 @@ export function useEditorController() {
     ...viewport,
     ...actions,
     ...files,
-    pickingNode,
+    ...conditions,
+    openConditions: (field: ConditionField) => {
+      if (!node || readonly) return;
+      conditionOrigin.current = {mapId, layer, selected, selectedEdge, view: {...viewport.view}, three, tool};
+      conditions.openConditions(map.id, node, field);
+      setPending(null); setSelected(null); setThree(false); setTool("select");
+    },
+    pickingNode: pickingNode || !!conditionSession,
     targetRequest,
     targetSession,
     requestTarget: (request: TargetRequest) => {
@@ -359,6 +391,10 @@ export function useEditorController() {
     finishNodePick,
     onNode: (id: string) => {
       if (didDrag.current || tool === "hand") return;
+      if (conditionSession) {
+        if (conditionPicking) conditions.setConditionPicked([...new Set([...conditionSession.picked.filter((id) => !map.nodes.some((n) => n.id === id && n.z === layer)), id])]);
+        return;
+      }
       if (pickingNode) {
         if (canPickNode(project, targetRequest, id)) {
           setSelected(id);
@@ -367,13 +403,13 @@ export function useEditorController() {
       } else preview.onNode(id);
     },
     setModal: (value: Modal) => {
-      if (!pickingNode) setModal(value);
+      if (!pickingNode && !conditionSession) setModal(value);
     },
     setThree: (value: boolean) => {
-      if (!pickingNode) setThree(value);
+      if (!pickingNode && !conditionSession) setThree(value);
     },
     togglePlay: () => {
-      if (!pickingNode) preview.togglePlay();
+      if (!pickingNode && !conditionSession) preview.togglePlay();
     },
   };
 }

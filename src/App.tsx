@@ -1,3 +1,5 @@
+import ConditionWorkspace from "./components/inspector/ConditionWorkspace";
+import { ConditionEditingContext } from "./components/inspector/ConditionEditingContext";
 import { useEffect, useRef } from "react";
 import TargetPicker from "./components/dialogs/TargetPicker";
 import NodePickOverlay from "./components/canvas/NodePickOverlay";
@@ -20,6 +22,7 @@ export default function App() {
     if (!editor.pickingNode) inspector.current = editor;
   });
   return (
+    <ConditionEditingContext.Provider value={editor.openConditions}>
     <TargetSelectionContext.Provider value={editor.requestTarget}>
       <div className={`app ${editor.pickingNode ? "picking-node" : ""}`}>
         <EditorHeader {...editor} />
@@ -27,6 +30,7 @@ export default function App() {
           <MapSidebar {...editor} />
           <main>
             <ViewSwitcher {...editor} />
+            <div className="editor-stage">
             <MapViewport
               {...editor}
               captionActions={
@@ -46,14 +50,16 @@ export default function App() {
                   visibility: editor.pickingNode ? "hidden" : undefined,
                 }}
               >
-                {!editor.selectionBox && (
+                {!editor.conditionSession && !editor.selectionBox && (
                   <SelectionInspector
                     {...(editor.pickingNode ? inspector.current : editor)}
                   />
                 )}
               </div>
-              <NodePickOverlay {...editor} />
+              {!editor.conditionSession && <NodePickOverlay {...editor} />}
             </MapViewport>
+            {editor.conditionSession && <ConditionWorkspace {...editor} />}
+            </div>
             <StatusBar {...editor} />
           </main>
         </div>
@@ -74,5 +80,6 @@ export default function App() {
         <TargetPicker {...editor} />
       </div>
     </TargetSelectionContext.Provider>
+    </ConditionEditingContext.Provider>
   );
 }

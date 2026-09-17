@@ -43,8 +43,9 @@ export function useProjectFiles({
     if (!f) return;
     try {
       if (f.size > 10 * 1024 * 1024) throw Error("文件不能超过 10 MB");
-      replaceProject(parseProject(await f.text()));
-      notify("导入成功，可撤销恢复原地图");
+      let migrated = false;
+      replaceProject(parseProject(await f.text(), () => { migrated = true; }));
+      notify(migrated ? "旧版项目已升级到 v2，所有旧显示条件和进入条件已清空，请重新配置；可撤销恢复原地图" : "导入成功，可撤销恢复原地图");
     } catch (error) {
       notify(
         `导入失败：${error instanceof Error ? error.message : String(error)}`,
@@ -59,13 +60,14 @@ export function useProjectFiles({
   };
   const restoreSavedProject = () => {
     try {
-      const draft = restoreDraft(localStorage);
+      let migrated = false;
+      const draft = restoreDraft(localStorage, () => { migrated = true; });
       if (!draft) {
         notify("没有可恢复的本机草稿");
         return;
       }
       replaceProject(draft);
-      notify("已恢复本机草稿");
+      notify(migrated ? "旧版草稿已升级到 v2，所有旧条件已清空，请重新配置" : "已恢复本机草稿");
     } catch (error) {
       notify(
         `恢复失败：${error instanceof Error ? error.message : String(error)}`,

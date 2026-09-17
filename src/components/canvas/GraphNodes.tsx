@@ -79,10 +79,10 @@ export default function GraphNodes({
               <text y="62" textAnchor="middle" className="node-name">
                 {n.name}
               </text>
-              {n.show.rules.length > 0 && !playing && (
+              {n.show.groups.length > 0 && !playing && (
                 <EyeOff x="24" y="-35" size={13} />
               )}
-              {n.enter.rules.length > 0 && !playing && (
+              {n.enter.groups.length > 0 && !playing && (
                 <LockKeyhole x="-36" y="-35" size={13} />
               )}
               {done && (

@@ -37,7 +37,7 @@ const edge = (
 });
 export function demoProject(): Project {
   return {
-    version: 1,
+    version: 2,
     name: "远境 · 探索之路",
     keys: [
       { mapId: null, id: "copper", name: "铜钥匙" },
@@ -80,14 +80,14 @@ export function demoProject(): Project {
           node("gate", "checkpoint", "古老封印", 24, 10, 0, {
             enter: {
               op: "all",
-              rules: [{ type: "key", ref: "copper", not: false }],
+              groups: [{ op: "all", rules: [{ type: "key", ref: "copper" }] }],
             },
           }),
           node("shop1", "shop", "树梢商人", 8, 10, 1),
           node("secret", "chest", "月之秘藏", 16, 5, -2, {
             show: {
               op: "all",
-              rules: [{ type: "visited", ref: "shop1", not: false }],
+              groups: [{ op: "all", rules: [{ type: "visited", ref: "shop1" }] }],
             },
             rewards: ["moon"],
           }),

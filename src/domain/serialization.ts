@@ -11,22 +11,8 @@ const strings = (v: unknown): v is string[] =>
   Array.isArray(v) && v.every((x) => typeof x === "string");
 const optionalString = (v: unknown) => v === undefined || typeof v === "string";
 const ports = ["top", "bottom", "left", "right"];
-function condition(v: unknown, depth = 0): v is ConditionGroup {
-  return (
-    record(v) &&
-    depth < 12 &&
-    ["all", "any"].includes(String(v.op)) &&
-    Array.isArray(v.rules) &&
-    v.rules.every(
-      (r) =>
-        record(r) &&
-        (r.rules !== undefined
-          ? condition(r, depth + 1)
-          : ["key", "visited"].includes(String(r.type)) &&
-            typeof r.ref === "string" &&
-            typeof r.not === "boolean"),
-    )
-  );
+function condition(v: unknown): v is ConditionGroup {
+ return record(v) && ["all", "any"].includes(String(v.op)) && Array.isArray(v.groups) && v.groups.every((g) => record(g) && ["all", "any"].includes(String(g.op)) && Array.isArray(g.rules) && g.rules.every((r) => record(r) && ["key", "visited"].includes(String(r.type)) && typeof r.ref === "string" && r.not === undefined && r.rules === undefined));
 }
 function node(v: unknown, kind: AtlasMap["kind"]): v is MapNode {
   return (
@@ -91,7 +77,7 @@ function map(v: unknown): v is AtlasMap {
 function project(v: unknown): v is Project {
   return (
     record(v) &&
-    v.version === 1 &&
+    v.version === 2 &&
     typeof v.name === "string" &&
     Array.isArray(v.keys) &&
     v.keys.every(
@@ -106,11 +92,19 @@ function project(v: unknown): v is Project {
     v.maps.filter((m) => m.kind === "world").length === 1
   );
 }
-export function parseProject(text: string): Project {
+export function parseProject(text: string, onMigration?: () => void): Project {
   const value: unknown = JSON.parse(text);
+  const migrated = record(value) && value.version === 1;
+  if (migrated && Array.isArray(value.maps)) {
+    for (const map of value.maps) if (record(map) && Array.isArray(map.nodes)) for (const node of map.nodes) if (record(node)) {
+      node.show = { op: "all", groups: [] };
+      node.enter = { op: "all", groups: [] };
+    }
+    value.version = 2;
+  }
   if (!project(value))
     throw new Error(
-      "不是有效的 Node Atlas v1 地图文件，或节点、连线、条件格式错误",
+      "不是有效的 Node Atlas v2 地图文件，或节点、连线、条件格式错误",
     );
   const ids = [
     ...value.maps.map((m) => m.id),
@@ -131,10 +125,7 @@ export function parseProject(text: string): Project {
         .filter((k) => k.mapId !== null && k.mapId !== m.id)
         .map((k) => k.id),
     );
-    const check = (c: ConditionGroup): boolean =>
-      c.rules.every((r) =>
-        r.rules ? check(r) : r.type !== "key" || !foreign.has(r.ref),
-      );
+    const check = (c: ConditionGroup): boolean => c.groups.every((g) => g.rules.every((r) => r.type !== "key" || !foreign.has(r.ref)));
     if (
       m.nodes.some(
         (n) =>
@@ -145,5 +136,6 @@ export function parseProject(text: string): Project {
     )
       throw new Error("节点不能引用其他二级地图的局部钥匙");
   }
+  if (migrated) onMigration?.();
   return value;
 }

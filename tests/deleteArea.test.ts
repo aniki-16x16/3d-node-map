@@ -15,9 +15,9 @@ test("area deletion cleans references and undo restores the complete map", () =>
   const exit = newNode("exit", 10, 10);
   exit.target = region.id;
   exit.targetEntry = entry.id;
-  exit.enter.rules.push({
+  exit.enter.groups.push({
     op: "all",
-    rules: [{ type: "visited", ref: entry.id, not: false }],
+    rules: [{ type: "visited", ref: entry.id }],
   });
   state.project.maps[0].nodes.push(region, exit);
   state.project.maps[0].edges.push({
@@ -45,9 +45,7 @@ test("area deletion cleans references and undo restores the complete map", () =>
   assert.equal(deleted.maps[0].edges.length, 0);
   assert.equal(deleted.maps[0].nodes[0].target, undefined);
   assert.equal(deleted.maps[0].nodes[0].targetEntry, undefined);
-  assert.deepEqual(deleted.maps[0].nodes[0].enter.rules, [
-    { op: "all", rules: [] },
-  ]);
+  assert.deepEqual(deleted.maps[0].nodes[0].enter.groups, []);
   const committed = projectHistoryReducer(state, {
     type: "commit",
     project: deleted,

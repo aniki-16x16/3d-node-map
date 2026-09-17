@@ -10,6 +10,7 @@ interface Options {
   layer: number;
   visibleNodes: MapNode[];
   readonly: boolean;
+  selectionOnly?: boolean;
   three: boolean;
   tool: EditorTool;
   setProject: Setter<Project>;
@@ -51,6 +52,7 @@ export function useCanvasInteraction({
   layer,
   visibleNodes,
   readonly,
+  selectionOnly = false,
   three,
   tool,
   setSelected,
@@ -101,9 +103,10 @@ export function useCanvasInteraction({
     )
       return;
     const pan = tool === "hand" || e.button === 1;
-    if (!pan && readonly) return;
+    if (!pan && readonly && !selectionOnly) return;
     if (
       !pan &&
+      !selectionOnly &&
       !e.ctrlKey &&
       selectedIds.length < 2 &&
       (e.target as Element).closest(".port")
@@ -111,6 +114,7 @@ export function useCanvasInteraction({
       return;
     if (
       !pan &&
+      !selectionOnly &&
       !e.ctrlKey &&
       selectedIds.length < 2 &&
       (e.target as Element).closest(".cross-layer > g")
@@ -123,14 +127,14 @@ export function useCanvasInteraction({
     const node = id ? map.nodes.find((node) => node.id === id) : undefined;
     gesture.current = pan
       ? { ...start, kind: "pan", x: view.x, y: view.y }
-      : node
+      : node && !selectionOnly
         ? {
             ...start,
             kind: "node",
             id: node.id,
             x: node.x,
             y: node.y,
-            base: e.ctrlKey ? selectedIds : [],
+            base: e.ctrlKey ? selectedIds : selectionOnly ? selectedIds.filter((id) => !visibleNodes.some((n) => n.id === id && n.z === layer)) : [],
             original: structuredClone(project),
             origins: map.nodes
               .filter((n) =>
@@ -149,7 +153,7 @@ export function useCanvasInteraction({
                 .closest("[data-edge-id]")
                 ?.getAttribute("data-edge-id") ?? undefined,
             additive: e.ctrlKey,
-            base: e.ctrlKey ? selectedIds : [],
+            base: e.ctrlKey ? selectedIds : selectionOnly ? selectedIds.filter((id) => !visibleNodes.some((n) => n.id === id && n.z === layer)) : [],
             x: e.clientX - r.left,
             y: e.clientY - r.top,
           };
@@ -208,10 +212,12 @@ export function useCanvasInteraction({
     if (g.kind === "select" && !didDrag.current && e.type === "pointerup") {
       if (g.id) selectNodes([...new Set([...g.base, g.id])]);
       else if (g.edgeId) {
-        if (!g.additive && selectedIds.length < 2) {
+        if (!selectionOnly && !g.additive && selectedIds.length < 2) {
           setSelected(null);
           setSelectedEdge(g.edgeId);
         }
+      } else if (selectionOnly) {
+        selectNodes(g.base);
       } else if (!g.base.length) {
         setSelected(null);
         setSelectedEdge(null);
