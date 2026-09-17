@@ -11,6 +11,7 @@ type Props = { children?: ReactNode; captionActions?: ReactNode } & Pick<
   EditorController,
   | "layer"
   | "setLayer"
+  | "selectedIds"
   | "selected"
   | "setSelected"
   | "selectedEdge"
@@ -24,6 +25,8 @@ type Props = { children?: ReactNode; captionActions?: ReactNode } & Pick<
   | "view"
   | "setView"
   | "history"
+  | "selectionBox"
+  | "temporaryHand"
   | "drag"
   | "canvas"
   | "map"
@@ -44,6 +47,7 @@ type Props = { children?: ReactNode; captionActions?: ReactNode } & Pick<
 export default function MapViewport({
   layer,
   setLayer,
+  selectedIds,
   selected,
   setSelected,
   selectedEdge,
@@ -57,6 +61,8 @@ export default function MapViewport({
   view,
   setView,
   history,
+  selectionBox,
+  temporaryHand,
   drag,
   canvas,
   map,
@@ -85,13 +91,22 @@ export default function MapViewport({
     setReference({ mapId: map.id, layer: value });
   return (
     <div
-      className={`canvas ${tool === "hand" ? "hand-tool" : ""} ${drag ? "dragging" : ""}`}
+      className={`canvas ${tool === "hand" || temporaryHand ? "hand-tool" : ""} ${drag ? "dragging" : ""}`}
       ref={canvas}
       tabIndex={-1}
-      onPointerDown={(e) => !three && pointerDown(e)}
+      onPointerDownCapture={(e) =>
+        !three &&
+        pointerDown(
+          e,
+          (e.target as Element)
+            .closest("[data-node-id]")
+            ?.getAttribute("data-node-id") ?? undefined,
+        )
+      }
       onPointerMove={pointerMove}
       onPointerUp={pointerUp}
       onPointerCancel={pointerUp}
+      onLostPointerCapture={pointerUp}
     >
       {three ? (
         <Scene3D
@@ -109,6 +124,7 @@ export default function MapViewport({
           {...{
             layer,
             setLayer,
+            selectedIds,
             selected,
             setSelected,
             selectedEdge,
@@ -125,6 +141,17 @@ export default function MapViewport({
             onNode,
             connect,
             pointerDown,
+          }}
+        />
+      )}
+      {selectionBox && (
+        <div
+          className="selection-box"
+          style={{
+            left: selectionBox.x,
+            top: selectionBox.y,
+            width: selectionBox.width,
+            height: selectionBox.height,
           }}
         />
       )}
@@ -145,7 +172,10 @@ export default function MapViewport({
         </p>
       </div>
       {!three && (
-        <CanvasToolbar {...{ tool, setTool, history, readonly, undo, redo }} />
+        <CanvasToolbar
+          {...{ setTool, history, readonly, undo, redo }}
+          tool={temporaryHand ? "hand" : tool}
+        />
       )}
       {pending && (
         <div className="connect-banner">

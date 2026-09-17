@@ -19,8 +19,20 @@ export function useEditorController() {
     document;
   const [mapId, setMapId] = useState("world"),
     [layer, setLayer] = useState(0);
-  const [selected, setSelected] = useState<string | null>(null),
+  const [selected, setSelectedValue] = useState<string | null>(null),
     [selectedEdge, setSelectedEdge] = useState<string | null>(null);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const setSelected: import("./editorTypes").Setter<string | null> = (
+    value,
+  ) => {
+    setSelectedIds([]);
+    setSelectedValue(value);
+  };
+  const selectNodes = (ids: string[]) => {
+    setSelectedIds(ids);
+    setSelectedValue(ids.length === 1 ? ids[0] : null);
+    setSelectedEdge(null);
+  };
   const [three, setThree] = useState(false),
     [tool, setTool] = useState<EditorTool>("select");
   const [pending, setPending] = useState<PendingConnection | null>(null),
@@ -100,7 +112,13 @@ export function useEditorController() {
     setSelected,
     setSelectedEdge,
     didDrag,
+    selectedIds: selectedIds.length ? selectedIds : selected ? [selected] : [],
+    selectNodes,
   });
+  useEffect(() => {
+    setSelected(null);
+    setSelectedEdge(null);
+  }, [layer, three]);
   const startNodePick = () => {
     pickOrigin.current = {
       mapId,
@@ -266,6 +284,7 @@ export function useEditorController() {
     layer,
     setLayer,
     selected,
+    selectedIds,
     setSelected,
     selectedEdge,
     setSelectedEdge,
@@ -304,6 +323,7 @@ export function useEditorController() {
     startNodePick,
     finishNodePick,
     onNode: (id: string) => {
+      if (didDrag.current || tool === "hand") return;
       if (pickingNode) {
         if (!didDrag.current) {
           setSelected(id);

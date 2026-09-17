@@ -7,6 +7,7 @@ type Props = { referenceLayer: number | null } & Pick<
   EditorController,
   | "layer"
   | "setLayer"
+  | "selectedIds"
   | "selected"
   | "setSelected"
   | "selectedEdge"
@@ -28,6 +29,7 @@ export default function Graph2D({
   layer,
   referenceLayer,
   setLayer,
+  selectedIds,
   selected,
   setSelected,
   selectedEdge,
@@ -101,6 +103,7 @@ export default function Graph2D({
           <GraphNodes
             {...{
               layer,
+              selectedIds,
               selected,
               playing,
               pending,

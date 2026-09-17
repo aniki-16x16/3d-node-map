@@ -183,3 +183,11 @@
     right: 10px;
   }
 }
+
+.selection-box {
+  position: absolute;
+  border: 1px solid #b8e8d1;
+  background: #b8e8d122;
+  pointer-events: none;
+  z-index: 6;
+}

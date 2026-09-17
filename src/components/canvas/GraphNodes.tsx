@@ -7,6 +7,7 @@ import { ICONS, colors } from "../nodeAppearance";
 type Props = Pick<
   EditorController,
   | "layer"
+  | "selectedIds"
   | "selected"
   | "playing"
   | "pending"
@@ -19,6 +20,7 @@ type Props = Pick<
 >;
 export default function GraphNodes({
   layer,
+  selectedIds,
   selected,
   playing,
   pending,
@@ -51,7 +53,7 @@ export default function GraphNodes({
                   onNode(n.id);
                 }
               }}
-              className={`map-node ${n.id === selected ? "selected" : ""} ${locked ? "locked" : ""} ${done ? "done" : ""}`}
+              className={`map-node ${n.id === selected || selectedIds.includes(n.id) ? "selected" : ""} ${locked ? "locked" : ""} ${done ? "done" : ""}`}
               style={{ "--node-color": colors[n.type] } as CSSProperties}
               onPointerDown={(e) => pointerDown(e, n.id)}
               onClick={(e) => {

@@ -1,6 +1,7 @@
+import { moveSelectedNodes, nodesInSelection } from "../domain/selection";
 import type { PointerEvent as ReactPointerEvent, RefObject } from "react";
 import { useEffect, useRef, useState } from "react";
-import { snapCoordinate } from "../domain/layout";
+
 import type { AtlasMap, MapNode, Project } from "../domain/types";
 import type { EditorTool, Setter, ViewTransform } from "./editorTypes";
 interface Options {
@@ -16,28 +17,59 @@ interface Options {
   setSelected: Setter<string | null>;
   setSelectedEdge: Setter<string | null>;
   didDrag: RefObject<boolean>;
+  selectedIds: string[];
+  selectNodes: (ids: string[]) => void;
 }
-type Gesture = { sx: number; sy: number; x: number; y: number } & (
-  { kind: "pan" } | { kind: "node"; id: string; original: Project }
+type Gesture = {
+  sx: number;
+  sy: number;
+  x: number;
+  y: number;
+  pointerId: number;
+} & (
+  | { kind: "pan" }
+  | {
+      kind: "node";
+      id: string;
+      base: string[];
+      original: Project;
+      origins: Pick<MapNode, "id" | "x" | "y">[];
+    }
+  | {
+      kind: "select";
+      id?: string;
+      edgeId?: string;
+      base: string[];
+      additive: boolean;
+    }
 );
 export function useCanvasInteraction({
   project,
   map,
+  setProject,
+  checkpoint,
   layer,
   visibleNodes,
   readonly,
   three,
   tool,
-  setProject,
-  checkpoint,
   setSelected,
   setSelectedEdge,
   didDrag,
+  selectedIds,
+  selectNodes,
 }: Options) {
   const canvas = useRef<HTMLDivElement>(null),
     gesture = useRef<Gesture | null>(null);
   const [view, setView] = useState<ViewTransform>({ x: 70, y: 40, k: 0.85 }),
     [drag, setDrag] = useState(false);
+  const [selectionBox, setSelectionBox] = useState<{
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+  } | null>(null);
+  const [temporaryHand, setTemporaryHand] = useState(false);
   const fit = () => {
     const nodes = visibleNodes.filter((n) => n.z === layer);
     if (!nodes.length) {
@@ -61,53 +93,81 @@ export function useCanvasInteraction({
     });
   };
   const pointerDown = (e: ReactPointerEvent, id?: string) => {
-    if (e.button !== 0 && e.button !== 1) return;
+    if (gesture.current || (e.button !== 0 && e.button !== 1)) return;
     if (
       (e.target as Element).closest(
-        "button, input, select, textarea, .canvas-ui",
+        "button, input, select, textarea, .canvas-ui, .drawer, .inspector-host",
       )
     )
       return;
-    if (id && readonly && tool !== "hand" && e.button !== 1) {
-      e.stopPropagation();
+    const pan = tool === "hand" || e.button === 1;
+    if (!pan && readonly) return;
+    if (
+      !pan &&
+      !e.ctrlKey &&
+      selectedIds.length < 2 &&
+      (e.target as Element).closest(".port")
+    )
       return;
-    }
-    if (id && tool !== "hand" && !readonly) {
-      e.stopPropagation();
-      gesture.current = {
-        kind: "node",
-        id,
-        sx: e.clientX,
-        sy: e.clientY,
-        x: map.nodes.find((n) => n.id === id)!.x,
-        y: map.nodes.find((n) => n.id === id)!.y,
-        original: structuredClone(project),
-      };
-    } else if (!id || tool === "hand" || e.button === 1) {
-      if (!id) {
-        setSelected(null);
-        setSelectedEdge(null);
-      }
-      gesture.current = {
-        kind: "pan",
-        sx: e.clientX,
-        sy: e.clientY,
-        x: view.x,
-        y: view.y,
-      };
-    } else return;
+    if (
+      !pan &&
+      !e.ctrlKey &&
+      selectedIds.length < 2 &&
+      (e.target as Element).closest(".cross-layer > g")
+    )
+      return;
+    e.preventDefault();
+    e.stopPropagation();
+    const r = canvas.current!.getBoundingClientRect();
+    const start = { sx: e.clientX, sy: e.clientY, pointerId: e.pointerId };
+    const node = id ? map.nodes.find((node) => node.id === id) : undefined;
+    gesture.current = pan
+      ? { ...start, kind: "pan", x: view.x, y: view.y }
+      : node
+        ? {
+            ...start,
+            kind: "node",
+            id: node.id,
+            x: node.x,
+            y: node.y,
+            base: e.ctrlKey ? selectedIds : [],
+            original: structuredClone(project),
+            origins: map.nodes
+              .filter((n) =>
+                selectedIds.includes(node.id)
+                  ? selectedIds.includes(n.id)
+                  : n.id === node.id,
+              )
+              .map(({ id, x, y }) => ({ id, x, y })),
+          }
+        : {
+            ...start,
+            kind: "select",
+            id,
+            edgeId:
+              (e.target as Element)
+                .closest("[data-edge-id]")
+                ?.getAttribute("data-edge-id") ?? undefined,
+            additive: e.ctrlKey,
+            base: e.ctrlKey ? selectedIds : [],
+            x: e.clientX - r.left,
+            y: e.clientY - r.top,
+          };
     didDrag.current = false;
     canvas.current!.setPointerCapture(e.pointerId);
-    setDrag(true);
+    setTemporaryHand(e.button === 1);
+    setDrag(pan);
   };
   const pointerMove = (e: ReactPointerEvent) => {
     const g = gesture.current;
-    if (!g) return;
+    if (!g || g.pointerId !== e.pointerId) return;
     const dx = e.clientX - g.sx,
       dy = e.clientY - g.sy;
     if (Math.hypot(dx, dy) > 3) didDrag.current = true;
     if (g.kind === "pan") setView((v) => ({ ...v, x: g.x + dx, y: g.y + dy }));
-    else
+    else if (g.kind === "node") {
+      if (!didDrag.current) return;
+      setDrag(true);
       setProject((p) => ({
         ...p,
         maps: p.maps.map((m) =>
@@ -115,30 +175,55 @@ export function useCanvasInteraction({
             ? m
             : {
                 ...m,
-                nodes: m.nodes.map((n) =>
-                  n.id !== g.id
-                    ? n
-                    : {
-                        ...n,
-                        x: snapCoordinate(g.x + dx / view.k),
-                        y: snapCoordinate(g.y + dy / view.k),
-                      },
+                nodes: moveSelectedNodes(
+                  m.nodes,
+                  g.origins,
+                  g,
+                  dx / view.k,
+                  dy / view.k,
                 ),
               },
         ),
       }));
+    } else if (didDrag.current) {
+      const box = {
+        x: Math.min(g.x, g.x + dx),
+        y: Math.min(g.y, g.y + dy),
+        width: Math.abs(dx),
+        height: Math.abs(dy),
+      };
+      setSelectionBox(box);
+      const ids = nodesInSelection(visibleNodes, layer, view, box);
+      selectNodes([...new Set([...g.base, ...ids])]);
+    }
   };
-  const pointerUp = () => {
+  const pointerUp = (e: ReactPointerEvent) => {
     const g = gesture.current;
-    if (g?.kind === "node") {
+    if (!g || g.pointerId !== e.pointerId) return;
+    if (g.kind === "node") {
       if (didDrag.current) checkpoint(g.original);
-      else {
-        setSelected(g.id);
+      else if (e.type === "pointerup")
+        selectNodes([...new Set([...g.base, g.id])]);
+    }
+    if (g.kind === "select" && !didDrag.current && e.type === "pointerup") {
+      if (g.id) selectNodes([...new Set([...g.base, g.id])]);
+      else if (g.edgeId) {
+        if (!g.additive && selectedIds.length < 2) {
+          setSelected(null);
+          setSelectedEdge(g.edgeId);
+        }
+      } else if (!g.base.length) {
+        setSelected(null);
         setSelectedEdge(null);
       }
     }
+    didDrag.current = true;
     gesture.current = null;
+    if (canvas.current?.hasPointerCapture(g.pointerId))
+      canvas.current.releasePointerCapture(g.pointerId);
     setDrag(false);
+    setTemporaryHand(false);
+    setSelectionBox(null);
     setTimeout(() => {
       didDrag.current = false;
     }, 0);
@@ -175,6 +260,8 @@ export function useCanvasInteraction({
   }, [three]);
   return {
     canvas,
+    selectionBox,
+    temporaryHand,
     view,
     setView,
     drag,

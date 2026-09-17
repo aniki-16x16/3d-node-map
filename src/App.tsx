@@ -46,9 +46,11 @@ export default function App() {
                   visibility: editor.pickingNode ? "hidden" : undefined,
                 }}
               >
-                <SelectionInspector
-                  {...(editor.pickingNode ? inspector.current : editor)}
-                />
+                {!editor.selectionBox && (
+                  <SelectionInspector
+                    {...(editor.pickingNode ? inspector.current : editor)}
+                  />
+                )}
               </div>
               <NodePickOverlay {...editor} />
             </MapViewport>

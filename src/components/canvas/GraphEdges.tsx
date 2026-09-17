@@ -46,6 +46,7 @@ export default function GraphEdges({
             return (
               <g
                 key={e.id}
+                data-edge-id={e.id}
                 className="cross-layer"
                 onPointerDown={(e) => e.stopPropagation()}
               >
@@ -91,6 +92,7 @@ export default function GraphEdges({
           return (
             <g
               key={e.id}
+              data-edge-id={e.id}
               onPointerDown={(e) => e.stopPropagation()}
               onClick={() => {
                 setSelectedEdge(e.id);
